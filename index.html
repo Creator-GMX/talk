@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TalkHub - Plataforma de Comunicação Real</title>
+    <title>TalkHub - Plataforma de Comunicação</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script>
@@ -75,37 +75,6 @@
             30% { opacity: 1; }
         }
         
-        .file-preview {
-            max-width: 300px;
-            max-height: 200px;
-            object-fit: cover;
-        }
-        
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1000;
-        }
-        
-        .connected {
-            background: #10b981;
-            color: white;
-        }
-        
-        .disconnected {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .reconnecting {
-            background: #f59e0b;
-            color: white;
-        }
-        
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .sidebar {
@@ -113,6 +82,7 @@
                 transition: transform 0.3s ease;
                 position: fixed;
                 z-index: 1000;
+                width: 85%;
             }
             
             .sidebar.open {
@@ -152,12 +122,8 @@
                 z-index: 100;
             }
             
-            .floating-btn {
-                bottom: 80px;
-            }
-            
             #chatMessages {
-                padding-bottom: 120px;
+                padding-bottom: 100px;
             }
             
             #messageInput {
@@ -234,8 +200,59 @@
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 min-h-screen">
     
     <!-- Connection Status -->
-    <div id="connectionStatus" class="connection-status connected hidden">
-        Conectado
+    <div id="connectionStatus" class="fixed top-4 right-4 glass-effect px-3 py-2 rounded-lg text-white text-sm z-50 hidden">
+        Status
+    </div>
+
+    <!-- Login/Register Screen -->
+    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2">TalkHub</h1>
+                <p class="text-gray-300">Sistema de comunicação em tempo real</p>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="space-y-4">
+                <h2 class="text-xl font-bold text-white text-center mb-4">Entrar</h2>
+                <input type="text" id="loginUsername" placeholder="Nome de usuário" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <input type="password" id="loginPassword" placeholder="Senha" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <button onclick="handleLogin()" class="w-full p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-semibold hover:from-primary/80 hover:to-secondary/80 transition-all">
+                    Entrar
+                </button>
+                <button onclick="showRegisterForm()" class="w-full p-3 border border-white/30 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
+                    Criar Nova Conta
+                </button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="space-y-4 hidden">
+                <h2 class="text-xl font-bold text-white text-center mb-4">Criar Conta</h2>
+                <input type="text" id="registerUsername" placeholder="Nome de usuário" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <input type="email" id="registerEmail" placeholder="E-mail" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <input type="password" id="registerPassword" placeholder="Senha" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <input type="password" id="registerConfirmPassword" placeholder="Confirmar Senha" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <input type="url" id="registerAvatar" placeholder="URL do Avatar (opcional)" 
+                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                <button onclick="handleRegister()" class="w-full p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all">
+                    Criar Conta
+                </button>
+                <button onclick="showLoginForm()" class="w-full p-3 border border-white/30 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
+                    Já tenho conta
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Mobile Header -->
@@ -256,38 +273,6 @@
         </button>
     </div>
 
-    <!-- Login Screen -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="glass-effect rounded-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                    </svg>
-                </div>
-                <h1 class="text-3xl font-bold text-white mb-2">TalkHub</h1>
-                <p class="text-gray-300">Sistema de comunicação em tempo real</p>
-            </div>
-            
-            <div class="space-y-4">
-                <input type="text" id="usernameInput" placeholder="Nome de usuário" 
-                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <input type="url" id="avatarInput" placeholder="URL do avatar (opcional)" 
-                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <input type="text" id="roomInput" placeholder="Sala (opcional)" 
-                       class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <button onclick="login()" class="w-full p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-semibold hover:from-primary/80 hover:to-secondary/80 transition-all">
-                    Entrar
-                </button>
-                
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">Seu ID único: <span id="peerIdDisplay" class="text-primary">Gerando...</span></p>
-                    <button onclick="copyToClipboard(document.getElementById('peerIdDisplay').textContent)" class="text-xs text-primary hover:text-primary/80 mt-1">Copiar ID</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main App -->
     <div id="mainApp" class="hidden min-h-screen">
         <!-- Sidebar -->
@@ -297,7 +282,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center cursor-pointer relative" onclick="showProfileModal()">
-                            <img id="userAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9869cefd-97f5-4696-b1f2-af4621ce2301.png">
+                            <img id="userAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d745109d-4ec6-4f9f-bc44-142013312ac9.png">
                             <span class="text-white font-bold text-lg" id="userInitials">U</span>
                             <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full online-indicator"></span>
                         </div>
@@ -307,11 +292,6 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="toggleNotifications()" id="notificationToggle" class="p-2 hover:bg-white/10 rounded-lg transition-all">
-                            <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-                            </svg>
-                        </button>
                         <button onclick="logout()" class="p-2 hover:bg-white/10 rounded-lg transition-all">
                             <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
@@ -321,10 +301,10 @@
                 </div>
                 
                 <!-- User ID Display -->
-                <div class="mt-3 p-2 bg-white/5 rounded-lg">
-                    <p class="text-xs text-gray-400">Seu ID:</p>
-                    <p class="text-sm text-white font-mono truncate" id="myPeerId">Carregando...</p>
-                    <button onclick="copyPeerId()" class="text-xs text-primary hover:text-primary/80">Copiar</button>
+                <div class="mt-3 p-3 bg-white/5 rounded-lg">
+                    <p class="text-xs text-gray-400">Seu TalkID:</p>
+                    <p class="text-lg text-white font-bold" id="myTalkId">----</p>
+                    <button onclick="copyTalkId()" class="text-xs text-primary hover:text-primary/80">Copiar</button>
                 </div>
             </div>
 
@@ -333,18 +313,18 @@
                 <button onclick="showTab('chats')" class="tab-btn flex-1 p-3 text-center text-white bg-primary/20 border-b-2 border-primary text-xs md:text-sm">
                     Chats
                 </button>
-                <button onclick="showTab('groups')" class="tab-btn flex-1 p-3 text-center text-gray-400 hover:text-white transition-all text-xs md:text-sm">
-                    Grupos
-                </button>
                 <button onclick="showTab('users')" class="tab-btn flex-1 p-3 text-center text-gray-400 hover:text-white transition-all text-xs md:text-sm">
                     Usuários
+                </button>
+                <button onclick="showTab('groups')" class="tab-btn flex-1 p-3 text-center text-gray-400 hover:text-white transition-all text-xs md:text-sm">
+                    Grupos
                 </button>
             </div>
 
             <!-- Search -->
             <div class="p-4">
                 <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Buscar..." 
+                    <input type="text" id="searchInput" placeholder="Buscar usuário por TalkID..." 
                            class="w-full p-3 pl-10 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm"
                            oninput="searchItems()">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -360,27 +340,27 @@
                     <!-- Chats will be populated here -->
                 </div>
 
-                <!-- Groups List -->
-                <div id="groupsList" class="p-4 space-y-2 hidden">
-                    <!-- Groups will be populated here -->
-                </div>
-
                 <!-- Users List -->
                 <div id="usersList" class="p-4 space-y-2 hidden">
                     <!-- Online users will be populated here -->
+                </div>
+
+                <!-- Groups List -->
+                <div id="groupsList" class="p-4 space-y-2 hidden">
+                    <!-- Groups will be populated here -->
                 </div>
             </div>
 
             <!-- Connect to User -->
             <div class="p-4 border-t border-white/10">
                 <div class="space-y-3">
-                    <input type="text" id="targetPeerInput" placeholder="ID do usuário" 
-                           class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm">
+                    <input type="text" id="targetTalkId" placeholder="TalkID (ex: 1234)" maxlength="4"
+                           class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm text-center font-mono">
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="connectToUser()" class="p-2 bg-primary hover:bg-primary/80 rounded-xl text-white text-sm font-medium transition-all">
                             💬 Chat
                         </button>
-                        <button onclick="startVideoCall()" class="p-2 bg-green-500 hover:bg-green-600 rounded-xl text-white text-sm font-medium transition-all">
+                        <button onclick="startQuickCall()" class="p-2 bg-green-500 hover:bg-green-600 rounded-xl text-white text-sm font-medium transition-all">
                             📹 Chamar
                         </button>
                     </div>
@@ -395,15 +375,13 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                            <img id="chatUserAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fa74b168-7a21-4a90-8582-998e88fe35c2.png">
+                            <img id="chatUserAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/04c9bc58-a177-4153-b740-39e163c053bd.png">
                             <span class="text-white font-bold text-sm" id="chatUserInitials">U</span>
                             <span id="chatUserOnlineIndicator" class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
                         </div>
                         <div>
-                            <h3 id="chatUserName" class="text-white font-semibold">Conectando...</h3>
-                            <p id="chatUserStatus" class="text-sm text-gray-400">
-                                <span id="connectionStatus">Conectando...</span>
-                            </p>
+                            <h3 id="chatUserName" class="text-white font-semibold">Usuário</h3>
+                            <p id="chatUserTalkId" class="text-xs text-gray-400">TalkID: ----</p>
                             <p id="typingIndicator" class="text-sm text-primary typing-indicator hidden">digitando...</p>
                         </div>
                     </div>
@@ -415,7 +393,7 @@
                         </button>
                         <button onclick="startAudioCall()" class="p-2 md:p-3 hover:bg-white/10 rounded-lg transition-all">
                             <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.40l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                             </svg>
                         </button>
                         <button onclick="disconnectFromUser()" class="p-2 md:p-3 hover:bg-white/10 rounded-lg transition-all text-red-400">
@@ -435,12 +413,12 @@
                             <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">TalkHub</h2>
-                    <p class="text-gray-400 text-lg mb-4">Sistema de comunicação P2P</p>
-                    <p class="text-gray-500 text-sm">Conecte-se usando IDs únicos</p>
-                    <div class="mt-6 p-4 bg-white/5 rounded-lg max-w-md mx-auto">
-                        <p class="text-gray-400 text-sm mb-2">Usuários online:</p>
-                        <p class="text-white text-2xl font-bold" id="onlineUsersCount">0</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Bem-vindo ao TalkHub!</h2>
+                    <p class="text-gray-400 text-lg mb-4">Conecte-se usando TalkIDs simples</p>
+                    <div class="bg-white/5 rounded-lg p-4 max-w-sm mx-auto">
+                        <p class="text-gray-400 text-sm mb-2">Seu TalkID é:</p>
+                        <p class="text-white text-3xl font-bold" id="welcomeTalkId">----</p>
+                        <p class="text-gray-500 text-xs mt-2">Compartilhe com amigos para conversar</p>
                     </div>
                 </div>
             </div>
@@ -451,25 +429,25 @@
             </div>
 
             <!-- Message Input -->
-            <div id="messageInput" class="glass-effect p-4 border-t border-white/10 hidden">
-                <div class="flex items-center space-x-2 md:space-x-3">
+            <div id="messageInput" class="glass-effect p-3 md:p-4 border-t border-white/10 hidden">
+                <div class="flex items-center space-x-2">
                     <input type="file" id="fileInput" multiple accept="*/*" class="hidden" onchange="handleFileSelect(event)">
                     <button onclick="document.getElementById('fileInput').click()" class="p-2 md:p-3 hover:bg-white/10 rounded-lg transition-all">
-                        <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"/>
                         </svg>
                     </button>
                     <button onclick="toggleRecording()" id="recordBtn" class="p-2 md:p-3 hover:bg-white/10 rounded-lg transition-all">
-                        <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
+                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 115 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
                         </svg>
                     </button>
                     <input type="text" id="messageText" placeholder="Digite sua mensagem..." 
-                           class="flex-1 p-2 md:p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm md:text-base"
+                           class="flex-1 p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm"
                            onkeypress="handleEnter(event)"
                            oninput="handleTyping()">
-                    <button onclick="sendMessage()" class="p-2 md:p-3 bg-primary hover:bg-primary/80 rounded-lg transition-all">
-                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <button onclick="sendMessage()" class="p-3 bg-primary hover:bg-primary/80 rounded-lg transition-all">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
                         </svg>
                     </button>
@@ -478,7 +456,7 @@
                 <div id="recordingIndicator" class="mt-2 hidden">
                     <div class="flex items-center space-x-2 text-red-400">
                         <div class="w-3 h-3 bg-red-400 rounded-full recording-pulse"></div>
-                        <span class="text-sm">Gravando... <span id="recordingTime">00:00</span></span>
+                        <span class="text-sm">🎤 Gravando... <span id="recordingTime">00:00</span></span>
                     </div>
                 </div>
             </div>
@@ -494,17 +472,17 @@
                 </svg>
                 <span class="text-xs mt-1">Chats</span>
             </button>
-            <button onclick="showTab('groups')" class="tab-mobile flex flex-col items-center p-2 text-gray-400">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                </svg>
-                <span class="text-xs mt-1">Grupos</span>
-            </button>
             <button onclick="showTab('users')" class="tab-mobile flex flex-col items-center p-2 text-gray-400">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <span class="text-xs mt-1">Usuários</span>
+            </button>
+            <button onclick="showTab('groups')" class="tab-mobile flex flex-col items-center p-2 text-gray-400">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                </svg>
+                <span class="text-xs mt-1">Grupos</span>
             </button>
             <button onclick="toggleSidebar()" class="tab-mobile flex flex-col items-center p-2 text-gray-400">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -519,19 +497,19 @@
     <div id="videoCallOverlay" class="fixed inset-0 video-call-overlay z-50 hidden">
         <div class="h-full flex flex-col">
             <!-- Call Header -->
-            <div class="p-4 md:p-6 text-center">
-                <h3 id="callUserName" class="text-white text-lg md:text-2xl font-bold mb-2">Chamada de Vídeo</h3>
-                <p id="callStatus" class="text-gray-300 text-sm md:text-base">Conectando...</p>
-                <p id="callTimer" class="text-gray-400 text-sm hidden">00:00</p>
+            <div class="p-4 text-center">
+                <h3 id="callUserName" class="text-white text-lg md:text-2xl font-bold mb-2">Chamada</h3>
+                <p id="callStatus" class="text-gray-300 text-sm">Conectando...</p>
+                <p id="callTimer" class="text-gray-400 text-sm mt-1 hidden">00:00</p>
             </div>
 
             <!-- Video Area -->
             <div class="flex-1 relative">
                 <video id="remoteVideo" class="w-full h-full object-cover bg-gray-800" autoplay playsinline></video>
-                <video id="localVideo" class="absolute bottom-4 right-4 w-24 h-18 md:w-48 md:h-36 object-cover rounded-lg border-2 border-white bg-gray-700" autoplay playsinline muted></video>
+                <video id="localVideo" class="absolute bottom-20 md:bottom-4 right-4 w-24 h-18 md:w-48 md:h-36 object-cover rounded-lg border-2 border-white bg-gray-700" autoplay playsinline muted></video>
                 
                 <!-- Call Controls -->
-                <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 md:space-x-4">
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
                     <button id="muteBtn" onclick="toggleMute()" class="p-3 md:p-4 bg-gray-600 hover:bg-gray-700 rounded-full transition-all">
                         <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12c0-1.594-.471-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -548,11 +526,6 @@
                         </svg>
                     </button>
                 </div>
-                
-                <!-- Call Quality Indicator -->
-                <div class="absolute top-4 left-4 bg-black/50 px-3 py-1 rounded-lg">
-                    <span class="text-white text-sm" id="callQuality">Conectando...</span>
-                </div>
             </div>
         </div>
     </div>
@@ -561,11 +534,12 @@
     <div id="incomingCallModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-60 hidden">
         <div class="glass-effect p-6 md:p-8 rounded-2xl text-center max-w-sm mx-4">
             <div class="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                <img id="incomingCallAvatar" src="" alt="Avatar" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/82409a77-9a2e-4032-961c-94ca451e39e8.png">
+                <img id="incomingCallAvatar" src="" alt="Avatar" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/022b34fd-f106-4eb3-9ba6-21f9b9568d58.png">
                 <span class="text-white text-xl md:text-2xl font-bold" id="incomingCallInitials">U</span>
                 <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
             </div>
-            <h3 id="incomingCallName" class="text-xl md:text-2xl font-bold text-white mb-2">Chamada Recebida</h3>
+            <h3 id="incomingCallName" class="text-xl md:text-2xl font-bold text-white mb-1">Chamada Recebida</h3>
+            <p id="incomingCallTalkId" class="text-sm text-gray-400 mb-4">TalkID: ----</p>
             <p id="incomingCallType" class="text-gray-300 mb-6">Chamada de vídeo</p>
             <div class="flex justify-center space-x-6">
                 <button onclick="acceptCall()" class="p-4 bg-green-500 hover:bg-green-600 rounded-full transition-all">
@@ -587,26 +561,32 @@
         <div class="glass-effect p-6 rounded-2xl w-full max-w-md mx-4">
             <h3 class="text-xl font-bold text-white mb-4">Configurações</h3>
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <label class="text-white">Notificações</label>
-                    <input type="checkbox" id="notificationsEnabled" class="toggle" checked>
-                </div>
-                <div class="flex items-center justify-between">
-                    <label class="text-white">Som</label>
-                    <input type="checkbox" id="soundEnabled" class="toggle" checked>
-                </div>
-                <div class="flex items-center justify-between">
-                    <label class="text-white">Auto-aceitar chamadas</label>
-                    <input type="checkbox" id="autoAcceptCalls" class="toggle">
+                <div>
+                    <label class="text-white block mb-2">Nome de usuário</label>
+                    <input type="text" id="settingsUsername" 
+                           class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary">
                 </div>
                 <div>
                     <label class="text-white block mb-2">Avatar URL</label>
                     <input type="url" id="settingsAvatarUrl" placeholder="https://exemplo.com/avatar.jpg"
                            class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary">
                 </div>
-                <button onclick="saveSettings()" class="w-full p-3 bg-primary hover:bg-primary/80 rounded-xl text-white font-medium transition-all">
-                    Salvar
-                </button>
+                <div class="flex items-center justify-between">
+                    <label class="text-white">Notificações</label>
+                    <input type="checkbox" id="notificationsEnabled" class="h-4 w-4 text-primary" checked>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-white">Som</label>
+                    <input type="checkbox" id="soundEnabled" class="h-4 w-4 text-primary" checked>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="saveSettings()" class="flex-1 p-3 bg-primary hover:bg-primary/80 rounded-xl text-white font-medium transition-all">
+                        Salvar
+                    </button>
+                    <button onclick="closeSettingsModal()" class="flex-1 p-3 border border-white/30 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
+                        Cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -634,17 +614,17 @@
         let currentConnection = null;
         let currentCall = null;
         let currentUser = null;
-        let currentRoom = null;
+        let currentUserEmail = null;
         let currentUserAvatar = null;
+        let myTalkId = null;
         let localStream = null;
         let isMuted = false;
         let isVideoOn = true;
         let callTimer = null;
         let callStartTime = null;
         let activeConnections = new Map();
-        let userProfiles = new Map();
         let userChats = new Map();
-        let userGroups = new Map();
+        let registeredUsers = new Map();
         let notificationsEnabled = true;
         let soundEnabled = true;
         let typingTimeout = null;
@@ -652,27 +632,230 @@
         let mediaRecorder = null;
         let recordingTimer = null;
         let recordingStartTime = null;
-        let currentAudioContext = null;
-        let currentAudioBuffer = null;
 
-        // Initialize PeerJS
-        function initializePeer() {
-            peer = new Peer({
+        // User Management System
+        function loadRegisteredUsers() {
+            const saved = localStorage.getItem('talkhub_users');
+            if (saved) {
+                const users = JSON.parse(saved);
+                users.forEach(user => {
+                    registeredUsers.set(user.username, user);
+                });
+            }
+        }
+
+        function saveRegisteredUsers() {
+            const users = Array.from(registeredUsers.values());
+            localStorage.setItem('talkhub_users', JSON.stringify(users));
+        }
+
+        function generateTalkId() {
+            // Generate a simple 4-digit ID
+            const existingIds = Array.from(registeredUsers.values()).map(u => u.talkId);
+            let newId;
+            
+            do {
+                newId = Math.floor(1000 + Math.random() * 9000).toString();
+            } while (existingIds.includes(newId));
+            
+            return newId;
+        }
+
+        function generatePeerIdFromTalkId(talkId) {
+            return `talkhub_${talkId}_${Date.now()}`;
+        }
+
+        // Authentication Functions
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const avatar = document.getElementById('registerAvatar').value.trim();
+
+            // Validation
+            if (!username || !email || !password) {
+                showNotification('Erro', 'Preencha todos os campos obrigatórios');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showNotification('Erro', 'As senhas não coincidem');
+                return;
+            }
+
+            if (registeredUsers.has(username)) {
+                showNotification('Erro', 'Nome de usuário já existe');
+                return;
+            }
+
+            // Check if email already exists
+            const emailExists = Array.from(registeredUsers.values()).some(user => user.email === email);
+            if (emailExists) {
+                showNotification('Erro', 'E-mail já cadastrado');
+                return;
+            }
+
+            // Create new user
+            const talkId = generateTalkId();
+            const newUser = {
+                username: username,
+                email: email,
+                password: btoa(password), // Simple encoding (not secure for production)
+                talkId: talkId,
+                avatar: avatar,
+                createdAt: new Date().toISOString(),
+                lastLogin: null
+            };
+
+            registeredUsers.set(username, newUser);
+            saveRegisteredUsers();
+
+            showNotification('Conta Criada', `Sua conta foi criada! Seu TalkID é: ${talkId}`);
+            
+            // Auto login
+            currentUser = username;
+            currentUserEmail = email;
+            currentUserAvatar = avatar;
+            myTalkId = talkId;
+            
+            initializeUserSession();
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showNotification('Erro', 'Preencha todos os campos');
+                return;
+            }
+
+            const user = registeredUsers.get(username);
+            if (!user) {
+                showNotification('Erro', 'Usuário não encontrado');
+                return;
+            }
+
+            if (atob(user.password) !== password) {
+                showNotification('Erro', 'Senha incorreta');
+                return;
+            }
+
+            // Update last login
+            user.lastLogin = new Date().toISOString();
+            registeredUsers.set(username, user);
+            saveRegisteredUsers();
+
+            // Set current user
+            currentUser = username;
+            currentUserEmail = user.email;
+            currentUserAvatar = user.avatar;
+            myTalkId = user.talkId;
+
+            showNotification('Login realizado', `Bem-vindo de volta, ${username}!`);
+            initializeUserSession();
+        }
+
+        function initializeUserSession() {
+            // Save session
+            const session = {
+                username: currentUser,
+                email: currentUserEmail,
+                avatar: currentUserAvatar,
+                talkId: myTalkId,
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem('talkhub_session', JSON.stringify(session));
+
+            // Show main app
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+
+            // Update UI
+            updateUserInterface();
+            
+            // Initialize peer with custom ID
+            initializePeerWithTalkId();
+        }
+
+        function updateUserInterface() {
+            document.getElementById('currentUserName').textContent = currentUser;
+            document.getElementById('userInitials').textContent = currentUser.charAt(0).toUpperCase();
+            document.getElementById('mobileTitle').textContent = currentUser;
+            document.getElementById('myTalkId').textContent = myTalkId;
+            document.getElementById('welcomeTalkId').textContent = myTalkId;
+
+            if (currentUserAvatar) {
+                document.getElementById('userAvatar').src = currentUserAvatar;
+                document.getElementById('userAvatar').classList.remove('hidden');
+                document.getElementById('userInitials').classList.add('hidden');
+            }
+
+            loadUserData();
+        }
+
+        function loadUserData() {
+            loadChats();
+            loadGroups();
+        }
+
+        function logout() {
+            // Clear session
+            localStorage.removeItem('talkhub_session');
+            
+            // Disconnect everything
+            if (currentCall) {
+                currentCall.close();
+            }
+            activeConnections.forEach(conn => conn.close());
+            activeConnections.clear();
+            
+            if (peer) {
+                peer.destroy();
+            }
+
+            // Reset UI
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authScreen').classList.remove('hidden');
+            showLoginForm();
+
+            // Clear variables
+            currentUser = null;
+            currentUserEmail = null;
+            currentUserAvatar = null;
+            myTalkId = null;
+            peer = null;
+
+            showNotification('Logout', 'Você foi desconectado');
+        }
+
+        // Initialize PeerJS with TalkID
+        function initializePeerWithTalkId() {
+            const customPeerId = generatePeerIdFromTalkId(myTalkId);
+            
+            peer = new Peer(customPeerId, {
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun.relay.metered.ca:80' }
+                        { urls: 'stun:stun1.l.google.com:19302' }
                     ]
                 }
             });
 
             peer.on('open', function(id) {
-                console.log('Peer ID:', id);
-                document.getElementById('peerIdDisplay').textContent = id;
-                document.getElementById('myPeerId').textContent = id;
-                loadUserProfile();
-                showNotification('Sistema Pronto', `Seu ID: ${id}`);
+                console.log('Peer conectado com ID:', id);
+                showNotification('Sistema Pronto', `TalkID: ${myTalkId} ativo`);
             });
 
             peer.on('connection', function(conn) {
@@ -685,286 +868,246 @@
 
             peer.on('error', function(err) {
                 console.error('Peer error:', err);
-                showNotification('Erro de Conexão', 'Erro na conexão P2P: ' + err.message);
+                showNotification('Erro', 'Erro na conexão P2P');
             });
         }
 
-        // User Profile Management
-        function saveUserProfile() {
-            const profile = {
-                name: currentUser,
-                avatar: currentUserAvatar,
-                room: currentRoom,
-                id: peer?.id,
-                lastSeen: new Date().toISOString()
-            };
-            localStorage.setItem('talkhub_profile', JSON.stringify(profile));
-        }
-
-        function loadUserProfile() {
-            const savedProfile = localStorage.getItem('talkhub_profile');
-            if (savedProfile) {
-                const profile = JSON.parse(savedProfile);
-                if (profile.avatar) {
-                    currentUserAvatar = profile.avatar;
-                    updateUserAvatar();
-                }
-            }
-        }
-
-        function updateUserAvatar() {
-            const avatarImg = document.getElementById('userAvatar');
-            const initials = document.getElementById('userInitials');
-            
-            if (currentUserAvatar) {
-                avatarImg.src = currentUserAvatar;
-                avatarImg.classList.remove('hidden');
-                initials.classList.add('hidden');
-            } else {
-                avatarImg.classList.add('hidden');
-                initials.classList.remove('hidden');
-            }
-        }
-
-        // Login function
-        function login() {
-            const username = document.getElementById('usernameInput').value.trim();
-            const avatar = document.getElementById('avatarInput').value.trim();
-            const room = document.getElementById('roomInput').value.trim() || 'general';
-            
-            if (!username) {
-                showNotification('Erro', 'Por favor, digite um nome de usuário');
-                return;
-            }
-            
-            currentUser = username;
-            currentRoom = room;
-            currentUserAvatar = avatar;
-            
-            // Hide login screen and show main app
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            
-            // Update UI
-            document.getElementById('currentUserName').textContent = username;
-            document.getElementById('userInitials').textContent = username.charAt(0).toUpperCase();
-            document.getElementById('mobileTitle').textContent = username;
-            
-            updateUserAvatar();
-            saveUserProfile();
-            
-            showNotification('Conectado', `Bem-vindo, ${username}!`);
-            
-            // Load saved chats and groups
-            loadChats();
-            loadGroups();
-        }
-
-        // Logout function
-        function logout() {
-            // Disconnect from all connections
-            activeConnections.forEach(conn => conn.close());
-            activeConnections.clear();
-            
-            if (currentCall) {
-                currentCall.close();
-            }
-            
-            // Reset UI
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            
-            // Clear data
-            currentUser = null;
-            currentRoom = null;
-            currentUserAvatar = null;
-            
-            showNotification('Desconectado', 'Você foi desconectado');
-        }
-
-        // Connection Management
+        // Connection Functions
         function connectToUser() {
-            const targetId = document.getElementById('targetPeerInput').value.trim();
-            if (!targetId) {
-                showNotification('Erro', 'Digite o ID do usuário');
+            const targetTalkId = document.getElementById('targetTalkId').value.trim();
+            if (!targetTalkId || targetTalkId.length !== 4) {
+                showNotification('Erro', 'Digite um TalkID válido (4 dígitos)');
                 return;
             }
-            
-            if (activeConnections.has(targetId)) {
-                showChatInterface(targetId);
+
+            if (targetTalkId === myTalkId) {
+                showNotification('Erro', 'Você não pode conectar consigo mesmo');
                 return;
             }
+
+            // Find all possible peer IDs for this TalkID
+            const targetPeerId = findPeerIdByTalkId(targetTalkId);
             
-            const conn = peer.connect(targetId);
-            handleConnection(conn, targetId);
+            if (activeConnections.has(targetTalkId)) {
+                showChatInterface(targetTalkId);
+                return;
+            }
+
+            // Try to connect
+            const conn = peer.connect(targetPeerId);
+            handleConnection(conn, targetTalkId);
         }
 
-        function handleConnection(conn, targetId) {
+        function findPeerIdByTalkId(talkId) {
+            // For now, we'll use a predictable pattern
+            // In a real app, you'd have a server to map TalkIDs to PeerIDs
+            return `talkhub_${talkId}_${Date.now()}`;
+        }
+
+        function handleConnection(conn, talkId) {
             conn.on('open', function() {
-                activeConnections.set(targetId, conn);
-                showChatInterface(targetId);
-                
+                activeConnections.set(talkId, conn);
+                showChatInterface(talkId);
+
                 // Send user profile
                 conn.send({
                     type: 'profile',
-                    user: currentUser,
+                    username: currentUser,
+                    talkId: myTalkId,
                     avatar: currentUserAvatar,
-                    message: `${currentUser} se conectou`
+                    email: currentUserEmail
                 });
-                
-                updateConnectionStatus('connected');
-                showNotification('Conectado', `Conectado com ${targetId}`);
-                
-                // Add to chats
-                addToChats(targetId, '', new Date().toISOString());
+
+                addToChats(talkId, '', new Date().toISOString());
+                showNotification('Conectado', `Conectado ao TalkID ${talkId}`);
             });
-            
+
             conn.on('data', function(data) {
-                handleIncomingData(data, targetId);
+                handleIncomingData(data, talkId);
             });
-            
+
             conn.on('close', function() {
-                activeConnections.delete(targetId);
-                showNotification('Desconectado', `Conexão com ${targetId} encerrada`);
+                activeConnections.delete(talkId);
+                showNotification('Desconectado', `TalkID ${talkId} desconectou`);
             });
-            
+
             conn.on('error', function(err) {
                 console.error('Connection error:', err);
-                showNotification('Erro', `Erro na conexão: ${err.message}`);
+                showNotification('Erro', 'Falha na conexão');
             });
         }
 
         function handleIncomingConnection(conn) {
-            const peerId = conn.peer;
-            activeConnections.set(peerId, conn);
+            // Extract TalkID from peer ID or wait for profile data
+            const tempId = conn.peer;
             
             conn.on('data', function(data) {
-                handleIncomingData(data, peerId);
-                
-                // Auto-show chat if not already shown
-                if (document.getElementById('chatHeader').classList.contains('hidden')) {
-                    showChatInterface(peerId);
+                if (data.type === 'profile') {
+                    const talkId = data.talkId;
+                    activeConnections.set(talkId, conn);
+                    
+                    // Store user profile
+                    const userProfile = {
+                        username: data.username,
+                        talkId: data.talkId,
+                        avatar: data.avatar,
+                        email: data.email
+                    };
+                    
+                    // Auto-show chat
+                    showChatInterface(talkId);
+                    updateChatHeader(userProfile);
+                    
+                    addToChats(talkId, '', new Date().toISOString());
+                    showNotification('Nova Conexão', `${data.username} (${talkId}) se conectou`);
+                } else {
+                    handleIncomingData(data, getTalkIdFromConnection(conn));
                 }
             });
-            
+
             conn.on('close', function() {
-                activeConnections.delete(peerId);
+                // Remove from active connections
+                activeConnections.forEach((connection, talkId) => {
+                    if (connection === conn) {
+                        activeConnections.delete(talkId);
+                    }
+                });
             });
         }
 
-        // Data Handling
-        function handleIncomingData(data, fromPeer) {
-            switch(data.type) {
-                case 'message':
-                    addMessage(data.message, data.user || fromPeer, false, data.timestamp);
-                    addToChats(fromPeer, data.message, data.timestamp);
-                    showNotification('Nova Mensagem', `${data.user || fromPeer}: ${data.message}`);
-                    playNotificationSound();
-                    break;
-                    
-                case 'profile':
-                    userProfiles.set(fromPeer, {
-                        name: data.user,
-                        avatar: data.avatar
-                    });
-                    updateChatHeader(fromPeer);
-                    addSystemMessage(`${data.user || fromPeer} se conectou`);
-                    break;
-                    
-                case 'typing':
-                    showTypingIndicator(true);
-                    break;
-                    
-                case 'stop-typing':
-                    showTypingIndicator(false);
-                    break;
-                    
-                case 'audio':
-                    addAudioMessage(data, fromPeer, false);
-                    showNotification('Áudio Recebido', `${data.user || fromPeer} enviou um áudio`);
-                    playNotificationSound();
-                    break;
-                    
-                case 'file':
-                    addFileMessage(data, fromPeer, false);
-                    showNotification('Arquivo Recebido', `${data.user || fromPeer} enviou um arquivo`);
-                    break;
+        function getTalkIdFromConnection(conn) {
+            for (let [talkId, connection] of activeConnections) {
+                if (connection === conn) {
+                    return talkId;
+                }
             }
+            return null;
         }
 
-        // Chat Interface
-        function showChatInterface(peerId) {
+        // Chat Interface Functions
+        function showChatInterface(talkId) {
             document.getElementById('welcomeScreen').classList.add('hidden');
             document.getElementById('chatHeader').classList.remove('hidden');
             document.getElementById('chatMessages').classList.remove('hidden');
             document.getElementById('messageInput').classList.remove('hidden');
-            
-            updateChatHeader(peerId);
-            loadChatMessages(peerId);
-            
+
+            // Load chat messages
+            loadChatMessages(talkId);
+
             // Close sidebar on mobile
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('open');
             }
-            
-            updateConnectionStatus('connected');
         }
 
-        function updateChatHeader(peerId) {
-            const profile = userProfiles.get(peerId);
-            
-            document.getElementById('chatUserName').textContent = profile?.name || peerId;
-            document.getElementById('chatUserInitials').textContent = (profile?.name || peerId).charAt(0).toUpperCase();
-            document.getElementById('mobileTitle').textContent = profile?.name || peerId;
-            
-            if (profile?.avatar) {
-                document.getElementById('chatUserAvatar').src = profile.avatar;
+        function updateChatHeader(userProfile) {
+            document.getElementById('chatUserName').textContent = userProfile.username;
+            document.getElementById('chatUserTalkId').textContent = `TalkID: ${userProfile.talkId}`;
+            document.getElementById('chatUserInitials').textContent = userProfile.username.charAt(0).toUpperCase();
+            document.getElementById('mobileTitle').textContent = userProfile.username;
+
+            if (userProfile.avatar) {
+                document.getElementById('chatUserAvatar').src = userProfile.avatar;
                 document.getElementById('chatUserAvatar').classList.remove('hidden');
-            } else {
-                document.getElementById('chatUserAvatar').classList.add('hidden');
             }
-            
-            // Update online status
-            document.getElementById('chatUserOnlineIndicator').classList.add('bg-green-400');
-            document.getElementById('connectionStatus').textContent = 'Online';
+        }
+
+        function disconnectFromUser() {
+            const currentTalkId = getCurrentTalkId();
+            if (currentTalkId && activeConnections.has(currentTalkId)) {
+                activeConnections.get(currentTalkId).close();
+                activeConnections.delete(currentTalkId);
+            }
+
+            // Hide chat interface
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            document.getElementById('chatHeader').classList.add('hidden');
+            document.getElementById('chatMessages').classList.add('hidden');
+            document.getElementById('messageInput').classList.add('hidden');
+            document.getElementById('mobileTitle').textContent = 'TalkHub';
         }
 
         // Message Handling
         function sendMessage() {
             const messageText = document.getElementById('messageText').value.trim();
             if (!messageText) return;
-            
-            const targetId = getCurrentChatId();
-            if (!targetId) {
+
+            const targetTalkId = getCurrentTalkId();
+            if (!targetTalkId) {
                 showNotification('Erro', 'Conecte-se a um usuário primeiro');
                 return;
             }
-            
-            const conn = activeConnections.get(targetId);
+
+            const conn = activeConnections.get(targetTalkId);
             if (!conn) {
                 showNotification('Erro', 'Conexão perdida');
                 return;
             }
-            
+
             const messageData = {
                 type: 'message',
                 message: messageText,
-                user: currentUser,
+                username: currentUser,
+                talkId: myTalkId,
                 timestamp: new Date().toISOString()
             };
-            
+
             conn.send(messageData);
             addMessage(messageText, currentUser, true, messageData.timestamp);
-            addToChats(targetId, messageText, messageData.timestamp);
-            
+            addToChats(targetTalkId, messageText, messageData.timestamp);
+
             document.getElementById('messageText').value = '';
+            
+            // Save message to localStorage
+            saveMessage(targetTalkId, messageData);
+        }
+
+        function handleIncomingData(data, fromTalkId) {
+            switch(data.type) {
+                case 'message':
+                    addMessage(data.message, data.username, false, data.timestamp);
+                    addToChats(fromTalkId, data.message, data.timestamp);
+                    saveMessage(fromTalkId, data);
+                    showNotification(`${data.username} (${data.talkId})`, data.message);
+                    playNotificationSound();
+                    break;
+
+                case 'typing':
+                    showTypingIndicator(true);
+                    break;
+
+                case 'stop-typing':
+                    showTypingIndicator(false);
+                    break;
+
+                case 'audio':
+                    addAudioMessage(data, data.username, false);
+                    addToChats(fromTalkId, '🎵 Mensagem de áudio', data.timestamp);
+                    saveMessage(fromTalkId, data);
+                    showNotification(`${data.username}`, 'Enviou um áudio');
+                    playNotificationSound();
+                    break;
+
+                case 'file':
+                    addFileMessage(data, data.username, false);
+                    addToChats(fromTalkId, `📎 ${data.fileName}`, data.timestamp);
+                    saveMessage(fromTalkId, data);
+                    showNotification(`${data.username}`, 'Enviou um arquivo');
+                    break;
+            }
         }
 
         function addMessage(message, sender, isOwn, timestamp) {
             const messagesContainer = document.getElementById('chatMessages');
+            
+            // Clear empty state if exists
+            if (messagesContainer.innerHTML.includes('Nenhuma mensagem')) {
+                messagesContainer.innerHTML = '';
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`;
-            
+
             const time = timestamp ? new Date(timestamp).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
@@ -972,7 +1115,7 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
-            
+
             messageDiv.innerHTML = `
                 <div class="message-bubble ${isOwn ? 'bg-primary' : 'bg-white/10'} p-3 rounded-2xl">
                     ${!isOwn ? `<p class="text-xs text-gray-300 mb-1 font-medium">${sender}</p>` : ''}
@@ -980,27 +1123,12 @@
                     <p class="text-xs ${isOwn ? 'text-primary-200' : 'text-gray-400'} mt-1">${time}</p>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function addSystemMessage(message) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex justify-center mb-4';
-            
-            messageDiv.innerHTML = `
-                <div class="bg-gray-600/50 px-3 py-1 rounded-full">
-                    <p class="text-gray-300 text-sm">${message}</p>
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // Audio Messaging
+        // Audio Messaging - Fixed
         function toggleRecording() {
             if (recordingState) {
                 stopRecording();
@@ -1014,49 +1142,51 @@
                 .then(stream => {
                     mediaRecorder = new MediaRecorder(stream);
                     const chunks = [];
-                    
+
                     mediaRecorder.ondataavailable = function(e) {
                         chunks.push(e.data);
                     };
-                    
+
                     mediaRecorder.onstop = function() {
                         const blob = new Blob(chunks, { type: 'audio/webm' });
                         const reader = new FileReader();
-                        
+
                         reader.onload = function() {
                             const audioData = {
                                 type: 'audio',
-                                data: reader.result,
+                                audioData: reader.result,
                                 duration: (Date.now() - recordingStartTime) / 1000,
-                                user: currentUser,
+                                username: currentUser,
+                                talkId: myTalkId,
                                 timestamp: new Date().toISOString()
                             };
-                            
-                            const targetId = getCurrentChatId();
-                            const conn = activeConnections.get(targetId);
+
+                            const targetTalkId = getCurrentTalkId();
+                            const conn = activeConnections.get(targetTalkId);
                             if (conn) {
                                 conn.send(audioData);
                                 addAudioMessage(audioData, currentUser, true);
-                                addToChats(targetId, '🎵 Mensagem de áudio', audioData.timestamp);
+                                addToChats(targetTalkId, '🎵 Mensagem de áudio', audioData.timestamp);
+                                saveMessage(targetTalkId, audioData);
                             }
                         };
-                        
+
                         reader.readAsDataURL(blob);
                         stream.getTracks().forEach(track => track.stop());
                     };
-                    
+
                     mediaRecorder.start();
                     recordingState = true;
                     recordingStartTime = Date.now();
-                    
+
                     // Update UI
                     document.getElementById('recordingIndicator').classList.remove('hidden');
                     document.getElementById('recordBtn').innerHTML = `
-                        <svg class="w-4 h-4 md:w-5 md:h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7z" clip-rule="evenodd"/>
                         </svg>
                     `;
-                    
+
                     // Start recording timer
                     recordingTimer = setInterval(() => {
                         const elapsed = (Date.now() - recordingStartTime) / 1000;
@@ -1065,8 +1195,12 @@
                         document.getElementById('recordingTime').textContent = 
                             `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                     }, 1000);
-                    
-                    showNotification('Gravando', 'Gravação de áudio iniciada');
+
+                    showNotification('Gravando', 'Pressione novamente para parar');
+                })
+                .catch(err => {
+                    console.error('Error accessing microphone:', err);
+                    showNotification('Erro', 'Não foi possível acessar o microfone');
                 });
         }
 
@@ -1074,22 +1208,20 @@
             if (mediaRecorder && recordingState) {
                 mediaRecorder.stop();
                 recordingState = false;
-                
-                // Clear recording timer
+
+                // Clear timer
                 if (recordingTimer) {
                     clearInterval(recordingTimer);
                     recordingTimer = null;
                 }
-                
+
                 // Reset UI
                 document.getElementById('recordingIndicator').classList.add('hidden');
                 document.getElementById('recordBtn').innerHTML = `
-                    <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 115 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
+                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7 4a3 3 0 616 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 115 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
                     </svg>
                 `;
-                
-                showNotification('Gravação', 'Áudio salvo e enviado');
             }
         }
 
@@ -1097,7 +1229,7 @@
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`;
-            
+
             const time = audioData.timestamp ? new Date(audioData.timestamp).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
@@ -1105,15 +1237,15 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
-            
+
             const duration = Math.floor(audioData.duration || 0);
             const audioId = 'audio_' + Date.now() + Math.random();
-            
+
             messageDiv.innerHTML = `
                 <div class="message-bubble ${isOwn ? 'bg-primary' : 'bg-white/10'} p-3 rounded-2xl">
                     ${!isOwn ? `<p class="text-xs text-gray-300 mb-1 font-medium">${sender}</p>` : ''}
                     <div class="audio-message">
-                        <button class="audio-play-btn" onclick="playAudio('${audioId}', this)">
+                        <button class="audio-play-btn" onclick="playAudioMessage('${audioId}', this)" data-playing="false">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
                             </svg>
@@ -1122,61 +1254,80 @@
                             <div class="audio-progress-bar" id="${audioId}_progress"></div>
                         </div>
                         <span class="audio-time">${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}</span>
-                        <audio id="${audioId}" src="${audioData.data}" preload="metadata" onended="audioEnded('${audioId}')"></audio>
                     </div>
+                    <audio id="${audioId}" src="${audioData.audioData}" preload="metadata" style="display: none;"></audio>
                     <p class="text-xs ${isOwn ? 'text-primary-200' : 'text-gray-400'} mt-1">${time}</p>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function playAudio(audioId, button) {
+        function playAudioMessage(audioId, button) {
             const audio = document.getElementById(audioId);
             const progress = document.getElementById(audioId + '_progress');
-            
-            if (audio.paused) {
-                // Stop other playing audios
+            const isPlaying = button.getAttribute('data-playing') === 'true';
+
+            if (!isPlaying) {
+                // Stop all other audio
                 document.querySelectorAll('audio').forEach(a => {
-                    if (a !== audio && !a.paused) {
+                    if (a !== audio) {
                         a.pause();
                         a.currentTime = 0;
                     }
                 });
-                
+
+                // Reset all other buttons
+                document.querySelectorAll('.audio-play-btn').forEach(btn => {
+                    btn.setAttribute('data-playing', 'false');
+                    btn.innerHTML = `
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                        </svg>
+                    `;
+                });
+
+                // Play audio
                 audio.play();
+                button.setAttribute('data-playing', 'true');
                 button.innerHTML = `
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
                     </svg>
                 `;
-                
+
                 // Update progress
                 const updateProgress = () => {
-                    if (!audio.paused) {
+                    if (!audio.paused && !audio.ended) {
                         const percent = (audio.currentTime / audio.duration) * 100;
                         progress.style.width = percent + '%';
                         requestAnimationFrame(updateProgress);
                     }
                 };
-                updateProgress();
-            } else {
-                audio.pause();
-                audioEnded(audioId);
-            }
-        }
 
-        function audioEnded(audioId) {
-            const button = document.querySelector(`button[onclick="playAudio('${audioId}', this)"]`);
-            const progress = document.getElementById(audioId + '_progress');
-            
-            button.innerHTML = `
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                </svg>
-            `;
-            progress.style.width = '0%';
+                audio.ontimeupdate = updateProgress;
+                audio.onended = () => {
+                    button.setAttribute('data-playing', 'false');
+                    button.innerHTML = `
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                        </svg>
+                    `;
+                    progress.style.width = '0%';
+                };
+            } else {
+                // Stop audio
+                audio.pause();
+                audio.currentTime = 0;
+                button.setAttribute('data-playing', 'false');
+                button.innerHTML = `
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                    </svg>
+                `;
+                progress.style.width = '0%';
+            }
         }
 
         // File Handling
@@ -1184,32 +1335,29 @@
             const files = event.target.files;
             const filePreview = document.getElementById('filePreview');
             filePreview.innerHTML = '';
-            
+
             Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    showNotification('Erro', 'Arquivo muito grande (máx: 10MB)');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.createElement('div');
                     preview.className = 'flex items-center space-x-3 p-3 bg-white/10 rounded-lg mb-2';
-                    
-                    let fileIcon = `
+
+                    preview.innerHTML = `
                         <div class="w-10 h-10 bg-primary/20 rounded flex items-center justify-center">
                             <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                    `;
-                    
-                    if (file.type.startsWith('image/')) {
-                        fileIcon = `<img src="${e.target.result}" alt="${file.name}" class="w-10 h-10 object-cover rounded">`;
-                    }
-                    
-                    preview.innerHTML = `
-                        ${fileIcon}
                         <div class="flex-1">
                             <p class="text-white text-sm">${file.name}</p>
                             <p class="text-gray-400 text-xs">${formatFileSize(file.size)}</p>
                         </div>
-                        <button onclick="sendFile(this, '${file.type}', '${file.name}', ${file.size})" class="p-2 bg-primary hover:bg-primary/80 rounded-lg transition-all">
+                        <button onclick="sendFile('${file.name}', '${file.type}', ${file.size}, '${e.target.result}')" class="p-2 bg-primary hover:bg-primary/80 rounded-lg transition-all">
                             <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
                             </svg>
@@ -1220,14 +1368,7 @@
                             </svg>
                         </button>
                     `;
-                    
-                    preview.fileData = {
-                        data: e.target.result,
-                        type: file.type,
-                        name: file.name,
-                        size: file.size
-                    };
-                    
+
                     filePreview.appendChild(preview);
                     filePreview.classList.remove('hidden');
                 };
@@ -1235,34 +1376,29 @@
             });
         }
 
-        function sendFile(button, fileType, fileName, fileSize) {
-            const preview = button.parentElement;
-            const fileData = {
-                type: 'file',
-                ...preview.fileData,
-                user: currentUser,
-                timestamp: new Date().toISOString()
-            };
+        function sendFile(fileName, fileType, fileSize, fileData) {
+            const targetTalkId = getCurrentTalkId();
+            const conn = activeConnections.get(targetTalkId);
             
-            const targetId = getCurrentChatId();
-            const conn = activeConnections.get(targetId);
             if (conn) {
-                conn.send(fileData);
-                addFileMessage(fileData, currentUser, true);
-                addToChats(targetId, `📎 ${fileName}`, fileData.timestamp);
-                preview.remove();
-                
-                if (document.getElementById('filePreview').children.length === 0) {
-                    document.getElementById('filePreview').classList.add('hidden');
-                }
-            }
-        }
+                const messageData = {
+                    type: 'file',
+                    fileName: fileName,
+                    fileType: fileType,
+                    fileSize: fileSize,
+                    fileData: fileData,
+                    username: currentUser,
+                    talkId: myTalkId,
+                    timestamp: new Date().toISOString()
+                };
 
-        function removeFilePreview(button) {
-            const preview = button.parentElement;
-            preview.remove();
-            
-            if (document.getElementById('filePreview').children.length === 0) {
+                conn.send(messageData);
+                addFileMessage(messageData, currentUser, true);
+                addToChats(targetTalkId, `📎 ${fileName}`, messageData.timestamp);
+                saveMessage(targetTalkId, messageData);
+
+                // Remove preview
+                document.getElementById('filePreview').innerHTML = '';
                 document.getElementById('filePreview').classList.add('hidden');
             }
         }
@@ -1271,7 +1407,7 @@
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`;
-            
+
             const time = fileData.timestamp ? new Date(fileData.timestamp).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
@@ -1279,10 +1415,14 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
-            
+
             let filePreview = '';
-            if (fileData.type.startsWith('image/')) {
-                filePreview = `<img src="${fileData.data}" alt="${fileData.name}" class="max-w-full max-h-48 rounded-lg mb-2 cursor-pointer" onclick="openImageModal('${fileData.data}', '${fileData.name}')">`;
+            if (fileData.fileType && fileData.fileType.startsWith('image/')) {
+                filePreview = `
+                    <img src="${fileData.fileData}" alt="${fileData.fileName}" 
+                         class="max-w-full max-h-48 rounded-lg mb-2 cursor-pointer" 
+                         onclick="openImageModal('${fileData.fileData}', '${fileData.fileName}')">
+                `;
             } else {
                 filePreview = `
                     <div class="flex items-center space-x-2 p-3 bg-white/10 rounded-lg mb-2">
@@ -1290,10 +1430,10 @@
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
                         </svg>
                         <div class="flex-1">
-                            <p class="text-white text-sm">${fileData.name}</p>
-                            <p class="text-gray-400 text-xs">${formatFileSize(fileData.size)}</p>
+                            <p class="text-white text-sm">${fileData.fileName}</p>
+                            <p class="text-gray-400 text-xs">${formatFileSize(fileData.fileSize)}</p>
                         </div>
-                        <a href="${fileData.data}" download="${fileData.name}" class="p-1 text-primary hover:text-primary/80">
+                        <a href="${fileData.fileData}" download="${fileData.fileName}" class="p-1 text-primary hover:text-primary/80">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
                             </svg>
@@ -1301,7 +1441,7 @@
                     </div>
                 `;
             }
-            
+
             messageDiv.innerHTML = `
                 <div class="message-bubble ${isOwn ? 'bg-primary' : 'bg-white/10'} p-3 rounded-2xl">
                     ${!isOwn ? `<p class="text-xs text-gray-300 mb-1 font-medium">${sender}</p>` : ''}
@@ -1309,66 +1449,84 @@
                     <p class="text-xs ${isOwn ? 'text-primary-200' : 'text-gray-400'} mt-1">${time}</p>
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Video Call Functions
-        function startVideoCall(targetId = null) {
-            if (!targetId) {
-                targetId = document.getElementById('targetPeerInput').value.trim() || getCurrentChatId();
+        function removeFilePreview(button) {
+            button.parentElement.remove();
+            if (document.getElementById('filePreview').children.length === 0) {
+                document.getElementById('filePreview').classList.add('hidden');
             }
-            
-            if (!targetId) {
-                showNotification('Erro', 'Digite o ID do usuário ou conecte-se primeiro');
+        }
+
+        // Video Call Functions
+        function startQuickCall() {
+            const targetTalkId = document.getElementById('targetTalkId').value.trim();
+            if (!targetTalkId || targetTalkId.length !== 4) {
+                showNotification('Erro', 'Digite um TalkID válido');
                 return;
             }
-            
+            startVideoCall(targetTalkId);
+        }
+
+        function startVideoCall(targetTalkId = null) {
+            if (!targetTalkId) {
+                targetTalkId = getCurrentTalkId();
+            }
+
+            if (!targetTalkId) {
+                showNotification('Erro', 'Conecte-se a um usuário primeiro');
+                return;
+            }
+
             navigator.mediaDevices.getUserMedia({
                 video: true,
                 audio: true
             }).then(function(stream) {
                 localStream = stream;
-                
+
                 document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = targetId;
+                document.getElementById('callUserName').textContent = `TalkID ${targetTalkId}`;
                 document.getElementById('callStatus').textContent = 'Chamando...';
                 document.getElementById('localVideo').srcObject = stream;
-                
-                const call = peer.call(targetId, stream);
+
+                const targetPeerId = findPeerIdByTalkId(targetTalkId);
+                const call = peer.call(targetPeerId, stream);
                 handleCall(call);
-                
+
             }).catch(function(err) {
                 console.error('Error accessing media:', err);
                 showNotification('Erro', 'Não foi possível acessar câmera/microfone');
             });
         }
 
-        function startAudioCall(targetId = null) {
-            if (!targetId) {
-                targetId = document.getElementById('targetPeerInput').value.trim() || getCurrentChatId();
+        function startAudioCall(targetTalkId = null) {
+            if (!targetTalkId) {
+                targetTalkId = getCurrentTalkId();
             }
-            
-            if (!targetId) {
-                showNotification('Erro', 'Digite o ID do usuário ou conecte-se primeiro');
+
+            if (!targetTalkId) {
+                showNotification('Erro', 'Conecte-se a um usuário primeiro');
                 return;
             }
-            
+
             navigator.mediaDevices.getUserMedia({
                 video: false,
                 audio: true
             }).then(function(stream) {
                 localStream = stream;
-                
+
                 document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = targetId;
+                document.getElementById('callUserName').textContent = `TalkID ${targetTalkId}`;
                 document.getElementById('callStatus').textContent = 'Chamando...';
                 document.getElementById('localVideo').style.display = 'none';
-                
-                const call = peer.call(targetId, stream);
+
+                const targetPeerId = findPeerIdByTalkId(targetTalkId);
+                const call = peer.call(targetPeerId, stream);
                 handleCall(call);
-                
+
             }).catch(function(err) {
                 console.error('Error accessing media:', err);
                 showNotification('Erro', 'Não foi possível acessar microfone');
@@ -1377,19 +1535,18 @@
 
         function handleCall(call) {
             currentCall = call;
-            
+
             call.on('stream', function(remoteStream) {
                 document.getElementById('remoteVideo').srcObject = remoteStream;
                 document.getElementById('callStatus').textContent = 'Conectado';
                 document.getElementById('callTimer').classList.remove('hidden');
-                document.getElementById('callQuality').textContent = 'Boa qualidade';
                 startCallTimer();
             });
-            
+
             call.on('close', function() {
                 endCall();
             });
-            
+
             call.on('error', function(err) {
                 console.error('Call error:', err);
                 showNotification('Erro na Chamada', err.message);
@@ -1398,46 +1555,43 @@
         }
 
         function handleIncomingCall(call) {
-            const profile = userProfiles.get(call.peer);
+            // Extract TalkID from metadata or peer ID
+            const fromTalkId = extractTalkIdFromPeerId(call.peer);
             
             document.getElementById('incomingCallModal').classList.remove('hidden');
-            document.getElementById('incomingCallName').textContent = profile?.name || call.peer;
-            document.getElementById('incomingCallInitials').textContent = (profile?.name || call.peer).charAt(0).toUpperCase();
-            
-            if (profile?.avatar) {
-                document.getElementById('incomingCallAvatar').src = profile.avatar;
-                document.getElementById('incomingCallAvatar').classList.remove('hidden');
-            }
-            
+            document.getElementById('incomingCallName').textContent = `TalkID ${fromTalkId}`;
+            document.getElementById('incomingCallTalkId').textContent = `TalkID: ${fromTalkId}`;
+            document.getElementById('incomingCallInitials').textContent = fromTalkId;
             document.getElementById('incomingCallType').textContent = 'Chamada recebida';
-            
+
             window.pendingCall = call;
-            
-            // Auto-accept if enabled
-            if (document.getElementById('autoAcceptCalls').checked) {
-                setTimeout(() => acceptCall(), 1000);
-            }
+        }
+
+        function extractTalkIdFromPeerId(peerId) {
+            // Extract TalkID from peer ID pattern: talkhub_XXXX_timestamp
+            const match = peerId.match(/talkhub_(\d{4})_/);
+            return match ? match[1] : 'Desconhecido';
         }
 
         function acceptCall() {
             const call = window.pendingCall;
             if (!call) return;
-            
+
             document.getElementById('incomingCallModal').classList.add('hidden');
-            
+
             navigator.mediaDevices.getUserMedia({
                 video: true,
                 audio: true
             }).then(function(stream) {
                 localStream = stream;
-                
+
                 document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = call.peer;
+                document.getElementById('callUserName').textContent = extractTalkIdFromPeerId(call.peer);
                 document.getElementById('localVideo').srcObject = stream;
-                
+
                 call.answer(stream);
                 handleCall(call);
-                
+
             }).catch(function(err) {
                 console.error('Error accessing media:', err);
                 call.close();
@@ -1458,25 +1612,24 @@
                 currentCall.close();
                 currentCall = null;
             }
-            
+
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
-            
+
             document.getElementById('videoCallOverlay').classList.add('hidden');
             document.getElementById('callTimer').classList.add('hidden');
             document.getElementById('localVideo').style.display = 'block';
-            
+
             if (callTimer) {
                 clearInterval(callTimer);
                 callTimer = null;
             }
-            
+
+            // Reset call controls
             isMuted = false;
             isVideoOn = true;
-            
-            // Reset buttons
             document.getElementById('muteBtn').classList.remove('bg-red-500');
             document.getElementById('muteBtn').classList.add('bg-gray-600');
             document.getElementById('videoBtn').classList.remove('bg-red-500');
@@ -1485,24 +1638,24 @@
 
         function toggleMute() {
             if (!localStream) return;
-            
+
             isMuted = !isMuted;
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
-            
+
             document.getElementById('muteBtn').classList.toggle('bg-red-500', isMuted);
             document.getElementById('muteBtn').classList.toggle('bg-gray-600', !isMuted);
         }
 
         function toggleVideo() {
             if (!localStream) return;
-            
+
             isVideoOn = !isVideoOn;
             localStream.getVideoTracks().forEach(track => {
                 track.enabled = isVideoOn;
             });
-            
+
             document.getElementById('videoBtn').classList.toggle('bg-red-500', !isVideoOn);
             document.getElementById('videoBtn').classList.toggle('bg-gray-600', isVideoOn);
         }
@@ -1518,32 +1671,50 @@
             }, 1000);
         }
 
-        // Chat and Group Management
-        function addToChats(peerId, lastMessage, timestamp) {
-            if (!userChats.has(peerId)) {
-                userChats.set(peerId, {
-                    id: peerId,
-                    name: userProfiles.get(peerId)?.name || peerId,
-                    avatar: userProfiles.get(peerId)?.avatar,
-                    lastMessage: lastMessage,
-                    timestamp: timestamp,
-                    unread: 0
-                });
-            } else {
-                const chat = userChats.get(peerId);
-                chat.lastMessage = lastMessage;
-                chat.timestamp = timestamp;
-                userChats.set(peerId, chat);
-            }
+        // Data Management
+        function addToChats(talkId, lastMessage, timestamp) {
+            const profile = getUserProfileByTalkId(talkId);
             
-            saveChatData();
+            userChats.set(talkId, {
+                talkId: talkId,
+                username: profile?.username || `TalkID ${talkId}`,
+                avatar: profile?.avatar,
+                lastMessage: lastMessage,
+                timestamp: timestamp,
+                unread: 0
+            });
+
+            saveChats();
             loadChats();
+        }
+
+        function getUserProfileByTalkId(talkId) {
+            // Look through registered users for this TalkID
+            for (let user of registeredUsers.values()) {
+                if (user.talkId === talkId) {
+                    return user;
+                }
+            }
+            return null;
+        }
+
+        function saveChats() {
+            const chatsArray = Array.from(userChats.values());
+            localStorage.setItem('talkhub_user_chats', JSON.stringify(chatsArray));
         }
 
         function loadChats() {
             const chatsList = document.getElementById('chatsList');
             chatsList.innerHTML = '';
-            
+
+            const savedChats = localStorage.getItem('talkhub_user_chats');
+            if (savedChats) {
+                const chats = JSON.parse(savedChats);
+                chats.forEach(chat => {
+                    userChats.set(chat.talkId, chat);
+                });
+            }
+
             if (userChats.size === 0) {
                 chatsList.innerHTML = `
                     <div class="text-center py-8">
@@ -1553,17 +1724,17 @@
                             </svg>
                         </div>
                         <p class="text-gray-400 text-sm">Nenhuma conversa ainda</p>
-                        <p class="text-gray-500 text-xs mt-1">Conecte-se usando IDs</p>
+                        <p class="text-gray-500 text-xs mt-1">Use TalkIDs para conectar</p>
                     </div>
                 `;
                 return;
             }
-            
+
             // Sort chats by timestamp
             const sortedChats = Array.from(userChats.values()).sort((a, b) => 
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
-            
+
             sortedChats.forEach(chat => {
                 const chatItem = createChatItem(chat);
                 chatsList.appendChild(chatItem);
@@ -1574,29 +1745,29 @@
             const div = document.createElement('div');
             div.className = 'chat-item p-3 hover:bg-white/10 rounded-xl cursor-pointer transition-all';
             div.onclick = () => {
-                if (activeConnections.has(chat.id)) {
-                    showChatInterface(chat.id);
+                document.getElementById('targetTalkId').value = chat.talkId;
+                if (activeConnections.has(chat.talkId)) {
+                    showChatInterface(chat.talkId);
                 } else {
-                    document.getElementById('targetPeerInput').value = chat.id;
                     connectToUser();
                 }
             };
-            
+
             const time = chat.timestamp ? new Date(chat.timestamp).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
             }) : '';
-            
+
             let avatarHtml = `
                 <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold text-sm">${chat.name.charAt(0).toUpperCase()}</span>
+                    <span class="text-white font-bold text-sm">${chat.username.charAt(0).toUpperCase()}</span>
                 </div>
             `;
-            
+
             if (chat.avatar) {
-                avatarHtml = `<img src="${chat.avatar}" alt="${chat.name}" class="w-10 h-10 rounded-full object-cover">`;
+                avatarHtml = `<img src="${chat.avatar}" alt="${chat.username}" class="w-10 h-10 rounded-full object-cover">`;
             }
-            
+
             div.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <div class="relative">
@@ -1605,14 +1776,15 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-white font-medium truncate">${chat.name}</h4>
+                            <h4 class="text-white font-medium truncate">${chat.username}</h4>
                             <span class="text-xs text-gray-400 flex-shrink-0 ml-2">${time}</span>
                         </div>
+                        <p class="text-xs text-gray-500">TalkID: ${chat.talkId}</p>
                         <p class="text-sm text-gray-400 truncate">${chat.lastMessage || 'Clique para conectar'}</p>
                     </div>
                 </div>
             `;
-            
+
             return div;
         }
 
@@ -1631,121 +1803,57 @@
             `;
         }
 
-        function loadChatMessages(peerId) {
-            // This would load chat history from storage
-            // For now, we'll just clear the messages
-            document.getElementById('chatMessages').innerHTML = '';
-        }
+        function loadChatMessages(talkId) {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '';
 
-        // Data Persistence
-        function saveChatData() {
-            const chatsData = Array.from(userChats.entries());
-            localStorage.setItem('talkhub_chats', JSON.stringify(chatsData));
-        }
-
-        function loadChatData() {
-            const chatsData = localStorage.getItem('talkhub_chats');
-            if (chatsData) {
-                const chats = JSON.parse(chatsData);
-                userChats = new Map(chats);
-            }
-        }
-
-        // UI Management
-        function showTab(tabName) {
-            // Hide all tabs
-            document.getElementById('chatsList').classList.add('hidden');
-            document.getElementById('groupsList').classList.add('hidden');
-            document.getElementById('usersList').classList.add('hidden');
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn, .tab-mobile').forEach(btn => {
-                btn.classList.remove('bg-primary/20', 'border-b-2', 'border-primary', 'text-white');
-                btn.classList.add('text-gray-400');
-            });
-            
-            // Show selected tab and activate button
-            document.getElementById(tabName + 'List').classList.remove('hidden');
-            
-            // Update button states
-            const tabButtons = document.querySelectorAll(`[onclick="showTab('${tabName}')"]`);
-            tabButtons.forEach(btn => {
-                btn.classList.add('text-white');
-                btn.classList.remove('text-gray-400');
-                if (btn.classList.contains('tab-btn')) {
-                    btn.classList.add('bg-primary/20', 'border-b-2', 'border-primary');
-                }
-            });
-            
-            // Load appropriate data
-            switch(tabName) {
-                case 'chats':
-                    loadChats();
-                    break;
-                case 'groups':
-                    loadGroups();
-                    break;
-                case 'users':
-                    loadOnlineUsers();
-                    break;
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-        }
-
-        function searchItems() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const activeTab = document.querySelector('.tab-btn.text-white')?.textContent.toLowerCase().trim() || 'chats';
-            
-            let items;
-            if (activeTab === 'chats') {
-                items = document.querySelectorAll('#chatsList .chat-item');
-            } else if (activeTab === 'grupos') {
-                items = document.querySelectorAll('#groupsList .group-item');
-            } else if (activeTab === 'usuários') {
-                items = document.querySelectorAll('#usersList .user-item');
-            }
-            
-            if (items) {
-                items.forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            // Load messages from localStorage
+            const savedMessages = localStorage.getItem(`talkhub_messages_${myTalkId}_${talkId}`);
+            if (savedMessages) {
+                const messages = JSON.parse(savedMessages);
+                messages.forEach(msg => {
+                    if (msg.type === 'message') {
+                        addMessage(msg.message, msg.username, msg.username === currentUser, msg.timestamp);
+                    } else if (msg.type === 'audio') {
+                        addAudioMessage(msg, msg.username, msg.username === currentUser);
+                    } else if (msg.type === 'file') {
+                        addFileMessage(msg, msg.username, msg.username === currentUser);
+                    }
                 });
+            } else {
+                messagesContainer.innerHTML = `
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <p class="text-gray-400 text-lg">Nenhuma mensagem ainda</p>
+                            <p class="text-gray-500 text-sm mt-1">Envie a primeira mensagem</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
-        function loadOnlineUsers() {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = `
-                <div class="text-center py-8">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <p class="text-gray-400 text-sm">Descoberta de usuários</p>
-                    <p class="text-gray-500 text-xs mt-1">Use IDs para conectar diretamente</p>
-                </div>
-            `;
+        function saveMessage(talkId, messageData) {
+            const key = `talkhub_messages_${myTalkId}_${talkId}`;
+            const savedMessages = JSON.parse(localStorage.getItem(key) || '[]');
+            savedMessages.push(messageData);
+            localStorage.setItem(key, JSON.stringify(savedMessages));
         }
 
         // Utility Functions
-        function getCurrentChatId() {
+        function getCurrentTalkId() {
             const chatUserName = document.getElementById('chatUserName').textContent;
-            if (chatUserName === 'Conectando...' || !chatUserName) return null;
             
-            // Try to find the peer ID from active connections
-            for (let [peerId, conn] of activeConnections) {
-                const profile = userProfiles.get(peerId);
-                if (profile?.name === chatUserName || peerId === chatUserName) {
-                    return peerId;
-                }
+            // Try to find TalkID from active connections
+            for (let [talkId, conn] of activeConnections) {
+                return talkId;
             }
             
-            return chatUserName;
+            return null;
         }
 
         function handleEnter(event) {
@@ -1756,15 +1864,15 @@
         }
 
         function handleTyping() {
-            const targetId = getCurrentChatId();
-            const conn = activeConnections.get(targetId);
-            
+            const targetTalkId = getCurrentTalkId();
+            const conn = activeConnections.get(targetTalkId);
+
             if (conn) {
-                conn.send({ type: 'typing', user: currentUser });
-                
+                conn.send({ type: 'typing', username: currentUser, talkId: myTalkId });
+
                 clearTimeout(typingTimeout);
                 typingTimeout = setTimeout(() => {
-                    conn.send({ type: 'stop-typing', user: currentUser });
+                    conn.send({ type: 'stop-typing', username: currentUser, talkId: myTalkId });
                 }, 1000);
             }
         }
@@ -1779,58 +1887,153 @@
             }
         }
 
-        function updateConnectionStatus(status) {
-            const statusEl = document.getElementById('connectionStatus');
-            statusEl.className = `connection-status ${status}`;
-            
-            switch(status) {
-                case 'connected':
-                    statusEl.textContent = 'Conectado';
+        function showTab(tabName) {
+            // Hide all tabs
+            document.getElementById('chatsList').classList.add('hidden');
+            document.getElementById('groupsList').classList.add('hidden');
+            document.getElementById('usersList').classList.add('hidden');
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn, .tab-mobile').forEach(btn => {
+                btn.classList.remove('bg-primary/20', 'border-b-2', 'border-primary', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+
+            // Show selected tab and activate buttons
+            document.getElementById(tabName + 'List').classList.remove('hidden');
+
+            const tabButtons = document.querySelectorAll(`[onclick="showTab('${tabName}')"]`);
+            tabButtons.forEach(btn => {
+                btn.classList.add('text-white');
+                btn.classList.remove('text-gray-400');
+                if (btn.classList.contains('tab-btn')) {
+                    btn.classList.add('bg-primary/20', 'border-b-2', 'border-primary');
+                }
+            });
+
+            // Load data
+            switch(tabName) {
+                case 'chats':
+                    loadChats();
                     break;
-                case 'disconnected':
-                    statusEl.textContent = 'Desconectado';
+                case 'groups':
+                    loadGroups();
                     break;
-                case 'connecting':
-                    statusEl.textContent = 'Conectando...';
+                case 'users':
+                    loadRegisteredUsersList();
                     break;
             }
-            
-            statusEl.classList.remove('hidden');
-            setTimeout(() => statusEl.classList.add('hidden'), 3000);
         }
 
-        function disconnectFromUser() {
-            const targetId = getCurrentChatId();
-            if (targetId && activeConnections.has(targetId)) {
-                activeConnections.get(targetId).close();
-                activeConnections.delete(targetId);
+        function loadRegisteredUsersList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            const users = Array.from(registeredUsers.values()).filter(u => u.username !== currentUser);
+
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-400 text-sm">Nenhum usuário registrado</p>
+                        <p class="text-gray-500 text-xs mt-1">Compartilhe o TalkHub com amigos</p>
+                    </div>
+                `;
+                return;
             }
-            
-            // Hide chat interface
-            document.getElementById('welcomeScreen').classList.remove('hidden');
-            document.getElementById('chatHeader').classList.add('hidden');
-            document.getElementById('chatMessages').classList.add('hidden');
-            document.getElementById('messageInput').classList.add('hidden');
-            document.getElementById('mobileTitle').textContent = 'TalkHub';
+
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'p-3 hover:bg-white/10 rounded-xl cursor-pointer transition-all';
+
+                let avatarHtml = `
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">${user.username.charAt(0).toUpperCase()}</span>
+                    </div>
+                `;
+
+                if (user.avatar) {
+                    avatarHtml = `<img src="${user.avatar}" alt="${user.username}" class="w-10 h-10 rounded-full object-cover">`;
+                }
+
+                userDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        ${avatarHtml}
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${user.username}</h4>
+                            <p class="text-gray-400 text-xs">TalkID: ${user.talkId}</p>
+                            <p class="text-xs text-green-400">Registrado</p>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="connectToUserByTalkId('${user.talkId}')" class="p-2 bg-primary hover:bg-primary/80 rounded text-white text-xs">
+                                💬
+                            </button>
+                            <button onclick="callUserByTalkId('${user.talkId}')" class="p-2 bg-green-500 hover:bg-green-600 rounded text-white text-xs">
+                                📹
+                            </button>
+                        </div>
+                    </div>
+                `;
+                usersList.appendChild(userDiv);
+            });
         }
 
-        function copyPeerId() {
-            const peerId = document.getElementById('myPeerId').textContent;
-            copyToClipboard(peerId);
+        function connectToUserByTalkId(talkId) {
+            document.getElementById('targetTalkId').value = talkId;
+            connectToUser();
+        }
+
+        function callUserByTalkId(talkId) {
+            startVideoCall(talkId);
+        }
+
+        function searchItems() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm.length === 4 && /^\d+$/.test(searchTerm)) {
+                // If it's a 4-digit number, auto-fill the target input
+                document.getElementById('targetTalkId').value = searchTerm;
+            }
+
+            // Filter visible items
+            const activeTab = document.querySelector('.tab-btn.text-white')?.textContent.toLowerCase().trim() || 'chats';
+            let items = [];
+
+            if (activeTab === 'chats') {
+                items = document.querySelectorAll('#chatsList .chat-item');
+            } else if (activeTab === 'usuários') {
+                items = document.querySelectorAll('#usersList > div');
+            }
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function copyTalkId() {
+            copyToClipboard(myTalkId);
         }
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                showNotification('Copiado', 'ID copiado para a área de transferência');
+                showNotification('Copiado', 'TalkID copiado');
             }).catch(() => {
-                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                showNotification('Copiado', 'ID copiado para a área de transferência');
+                showNotification('Copiado', 'TalkID copiado');
             });
         }
 
@@ -1845,65 +2048,83 @@
         // Settings Functions
         function showSettings() {
             document.getElementById('settingsModal').classList.remove('hidden');
-            
-            // Load current settings
+            document.getElementById('settingsUsername').value = currentUser;
             document.getElementById('settingsAvatarUrl').value = currentUserAvatar || '';
         }
 
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
         function saveSettings() {
-            notificationsEnabled = document.getElementById('notificationsEnabled').checked;
-            soundEnabled = document.getElementById('soundEnabled').checked;
-            
+            const newUsername = document.getElementById('settingsUsername').value.trim();
             const newAvatar = document.getElementById('settingsAvatarUrl').value.trim();
+            
+            if (newUsername && newUsername !== currentUser) {
+                // Check if username is available
+                if (registeredUsers.has(newUsername) && newUsername !== currentUser) {
+                    showNotification('Erro', 'Nome de usuário já existe');
+                    return;
+                }
+                
+                // Update username
+                const userData = registeredUsers.get(currentUser);
+                registeredUsers.delete(currentUser);
+                userData.username = newUsername;
+                registeredUsers.set(newUsername, userData);
+                saveRegisteredUsers();
+                
+                currentUser = newUsername;
+                document.getElementById('currentUserName').textContent = newUsername;
+                document.getElementById('userInitials').textContent = newUsername.charAt(0).toUpperCase();
+            }
+            
             if (newAvatar !== currentUserAvatar) {
                 currentUserAvatar = newAvatar;
-                updateUserAvatar();
-                saveUserProfile();
-            }
-            
-            document.getElementById('settingsModal').classList.add('hidden');
-            showNotification('Configurações', 'Configurações salvas com sucesso');
-        }
-
-        function toggleNotifications() {
-            notificationsEnabled = !notificationsEnabled;
-            const btn = document.getElementById('notificationToggle');
-            
-            if (notificationsEnabled) {
-                btn.classList.remove('text-gray-400');
-                btn.classList.add('text-primary');
                 
-                // Request permission if needed
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission();
-                }
-            } else {
-                btn.classList.remove('text-primary');
-                btn.classList.add('text-gray-400');
+                // Update in registered users
+                const userData = registeredUsers.get(currentUser);
+                userData.avatar = newAvatar;
+                registeredUsers.set(currentUser, userData);
+                saveRegisteredUsers();
+                
+                updateUserAvatar();
             }
             
-            showNotification('Notificações', notificationsEnabled ? 'Ativadas' : 'Desativadas');
+            closeSettingsModal();
+            showNotification('Configurações', 'Perfil atualizado com sucesso');
         }
 
+        function updateUserAvatar() {
+            const avatarImg = document.getElementById('userAvatar');
+            const initials = document.getElementById('userInitials');
+
+            if (currentUserAvatar) {
+                avatarImg.src = currentUserAvatar;
+                avatarImg.classList.remove('hidden');
+                initials.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                initials.classList.remove('hidden');
+            }
+        }
+
+        // Notification Functions
         function showNotification(title, body) {
-            // Browser notification
             if (notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
                 const notification = new Notification(title, {
                     body: body,
-                    icon: '/favicon.ico',
-                    tag: 'talkhub-notification'
+                    icon: '/favicon.ico'
                 });
-                
                 setTimeout(() => notification.close(), 5000);
             }
-            
-            // In-app notification
+
             const notification = document.getElementById('notification');
             document.getElementById('notificationTitle').textContent = title;
             document.getElementById('notificationBody').textContent = body;
-            
+
             notification.classList.remove('hidden');
-            
+
             setTimeout(() => {
                 notification.classList.add('hidden');
             }, 4000);
@@ -1915,76 +2136,97 @@
 
         function playNotificationSound() {
             if (soundEnabled) {
-                // Create a simple notification sound
                 try {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
-                    
+
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    
+
                     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-                    
                     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    
+
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.2);
                 } catch (e) {
-                    // Fallback - just ignore if audio context fails
+                    // Ignore audio context errors
                 }
             }
         }
 
         function showProfileModal() {
-            const profile = {
-                name: currentUser,
-                id: peer?.id,
-                avatar: currentUserAvatar
-            };
-            showNotification('Perfil', `Nome: ${profile.name}\nID: ${profile.id}\nAvatar: ${profile.avatar ? 'Definido' : 'Não definido'}`);
+            showNotification('Perfil', `Nome: ${currentUser}\nTalkID: ${myTalkId}\nAvatar: ${currentUserAvatar ? 'Definido' : 'Não definido'}`);
         }
 
-        // Image modal
         function openImageModal(src, name) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4';
             modal.onclick = () => modal.remove();
-            
+
             modal.innerHTML = `
                 <div class="max-w-4xl max-h-full">
                     <img src="${src}" alt="${name}" class="max-w-full max-h-full object-contain rounded-lg">
                     <p class="text-white text-center mt-4">${name}</p>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
         }
 
-        // Initialize everything when page loads
+        // Auto-login if session exists
+        function checkExistingSession() {
+            const session = localStorage.getItem('talkhub_session');
+            if (session) {
+                const userData = JSON.parse(session);
+                
+                // Verify user still exists
+                if (registeredUsers.has(userData.username)) {
+                    currentUser = userData.username;
+                    currentUserEmail = userData.email;
+                    currentUserAvatar = userData.avatar;
+                    myTalkId = userData.talkId;
+                    
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    
+                    updateUserInterface();
+                    initializePeerWithTalkId();
+                    
+                    showNotification('Auto-Login', `Bem-vindo de volta, ${currentUser}!`);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            initializePeer();
-            loadChatData();
+            loadRegisteredUsers();
             
+            // Check for existing session
+            if (!checkExistingSession()) {
+                showLoginForm();
+            }
+
             // Request notification permission
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
             }
-            
+
             // Handle window resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 768) {
                     document.getElementById('sidebar').classList.remove('open');
                 }
             });
-            
+
             // Close sidebar when clicking outside on mobile
             document.addEventListener('click', function(e) {
                 const sidebar = document.getElementById('sidebar');
                 const sidebarToggle = e.target.closest('[onclick="toggleSidebar()"]');
-                
+
                 if (window.innerWidth <= 768 && 
                     !sidebar.contains(e.target) && 
                     !sidebarToggle && 
@@ -1992,36 +2234,43 @@
                     sidebar.classList.remove('open');
                 }
             });
-            
-            // Add keyboard shortcuts
+
+            // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Escape key to close modals or calls
                 if (e.key === 'Escape') {
                     if (currentCall) {
                         endCall();
                     } else {
                         document.getElementById('settingsModal').classList.add('hidden');
                         document.getElementById('incomingCallModal').classList.add('hidden');
-                        
-                        // Close sidebar on mobile
                         if (window.innerWidth <= 768) {
                             document.getElementById('sidebar').classList.remove('open');
                         }
                     }
                 }
-                
-                // Ctrl+M to toggle mute during call
+
                 if (e.ctrlKey && e.key === 'm' && currentCall) {
                     e.preventDefault();
                     toggleMute();
                 }
-                
-                // Ctrl+Shift+V to toggle video during call
+
                 if (e.ctrlKey && e.shiftKey && e.key === 'V' && currentCall) {
                     e.preventDefault();
                     toggleVideo();
                 }
             });
+
+            // Auto-focus on TalkID input and format it
+            const talkIdInput = document.getElementById('targetTalkId');
+            if (talkIdInput) {
+                talkIdInput.addEventListener('input', function(e) {
+                    // Only allow numbers
+                    this.value = this.value.replace(/\D/g, '');
+                    if (this.value.length > 4) {
+                        this.value = this.value.slice(0, 4);
+                    }
+                });
+            }
         });
     </script>
 </body>
