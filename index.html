@@ -7,11 +7,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <!-- Firebase SDKs v9 -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, serverTimestamp, onSnapshot, orderBy } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js';
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIga7wwaaC_M9G0sDoBE-95E9yG2aAdzU",
+            authDomain: "mapp-20fb8.firebaseapp.com",
+            projectId: "mapp-20fb8",
+            storageBucket: "mapp-20fb8.firebasestorage.app",
+            messagingSenderId: "276853120997",
+            appId: "1:276853120997:web:2792f7cd2d330724c0d90c",
+            measurementId: "G-7K3RDGJCC2"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        // Make Firebase functions globally accessible
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseFunctions = {
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            sendPasswordResetEmail,
+            doc,
+            setDoc,
+            getDoc,
+            collection,
+            addDoc,
+            query,
+            where,
+            getDocs,
+            updateDoc,
+            serverTimestamp,
+            onSnapshot,
+            orderBy
+        };
+    </script>
     
     <script>
         tailwind.config = {
@@ -80,37 +122,6 @@
         @keyframes typing {
             0%, 60%, 100% { opacity: 0.3; }
             30% { opacity: 1; }
-        }
-        
-        .file-preview {
-            max-width: 300px;
-            max-height: 200px;
-            object-fit: cover;
-        }
-        
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1000;
-        }
-        
-        .connected {
-            background: #10b981;
-            color: white;
-        }
-        
-        .disconnected {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .reconnecting {
-            background: #f59e0b;
-            color: white;
         }
         
         /* Mobile optimizations */
@@ -223,7 +234,6 @@
             color: #9ca3af;
         }
         
-        /* Recording Animation */
         .recording-pulse {
             animation: recording-pulse 1s infinite;
         }
@@ -340,7 +350,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center cursor-pointer relative" onclick="showProfileModal()">
-                            <img id="userAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/aaab90e4-4391-4e1c-b0b4-ebe1b992e112.png" alt="Avatar do usuário logado com foto de perfil personalizada" class="w-full h-full rounded-full object-cover hidden">
+                            <img id="userAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/959afd2b-1fdd-45df-baca-c380bfb6bd26.png" alt="Avatar do usuário logado com foto de perfil personalizada" class="w-full h-full rounded-full object-cover hidden">
                             <span class="text-white font-bold text-lg" id="userInitials">U</span>
                             <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full online-indicator"></span>
                         </div>
@@ -433,7 +443,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                            <img id="chatUserAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/779a7113-e262-4f38-b255-1117b73629d5.png" alt="Avatar do usuário no chat atual mostrando foto de perfil" class="w-full h-full rounded-full object-cover hidden">
+                            <img id="chatUserAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a095def9-a8bb-4d7a-a341-bdf61a2b30e9.png" alt="Avatar do usuário no chat atual mostrando foto de perfil" class="w-full h-full rounded-full object-cover hidden">
                             <span class="text-white font-bold text-sm" id="chatUserInitials">U</span>
                             <span id="chatUserOnlineIndicator" class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
                         </div>
@@ -592,7 +602,7 @@
     <div id="incomingCallModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-60 hidden">
         <div class="glass-effect p-6 md:p-8 rounded-2xl text-center max-w-sm mx-4">
             <div class="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                <img id="incomingCallAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a6418fbd-50f5-44d1-83b8-e61e108cc8ab.png" alt="Avatar do usuário fazendo chamada recebida" class="w-full h-full rounded-full object-cover hidden">
+                <img id="incomingCallAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/654a9f4f-9974-4b88-9fb0-6f89d83ac203.png" alt="Avatar do usuário fazendo chamada recebida" class="w-full h-full rounded-full object-cover hidden">
                 <span class="text-white text-xl md:text-2xl font-bold" id="incomingCallInitials">U</span>
                 <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
             </div>
@@ -667,22 +677,28 @@
     </div>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAIga7wwaaC_M9G0sDoBE-95E9yG2aAdzU",
-            authDomain: "mapp-20fb8.firebaseapp.com",
-            projectId: "mapp-20fb8",
-            storageBucket: "mapp-20fb8.firebasestorage.app",
-            messagingSenderId: "276853120997",
-            appId: "1:276853120997:web:2792f7cd2d330724c0d90c",
-            measurementId: "G-7K3RDGJCC2"
-        };
+        // Wait for Firebase to load
+        let firebaseInitialized = false;
+        let initializationAttempts = 0;
+        const maxAttempts = 50;
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const analytics = firebase.analytics();
+        function waitForFirebase() {
+            if (window.firebaseAuth && window.firebaseDb) {
+                firebaseInitialized = true;
+                initializeApp();
+                return;
+            }
+            
+            initializationAttempts++;
+            if (initializationAttempts < maxAttempts) {
+                setTimeout(waitForFirebase, 100);
+            } else {
+                console.error('Firebase failed to initialize');
+                showNotification('Erro', 'Falha ao inicializar o Firebase');
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('authScreen').classList.remove('hidden');
+            }
+        }
 
         // Global Variables
         let peer = null;
@@ -706,8 +722,31 @@
         let recordingTimer = null;
         let recordingStartTime = null;
 
-        // Firebase Authentication Functions
-        function handleLogin() {
+        // Generate unique TalkID
+        function generateTalkId() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
+        // Initialize App
+        function initializeApp() {
+            // Set up Firebase auth state observer
+            window.firebaseFunctions.onAuthStateChanged(window.firebaseAuth, (user) => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                
+                if (user) {
+                    console.log('User is signed in:', user.uid);
+                    loadUserData(user);
+                } else {
+                    console.log('User is signed out');
+                    document.getElementById('authScreen').classList.remove('hidden');
+                    document.getElementById('mainApp').classList.add('hidden');
+                    showLoginForm();
+                }
+            });
+        }
+
+        // Authentication Functions
+        async function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
@@ -718,41 +757,37 @@
 
             setLoading('loginBtn', true);
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log('Login successful:', user);
-                    loadUserData(user);
-                })
-                .catch((error) => {
-                    console.error('Login error:', error);
-                    let errorMessage = 'Erro no login';
-                    
-                    switch(error.code) {
-                        case 'auth/user-not-found':
-                            errorMessage = 'Usuário não encontrado';
-                            break;
-                        case 'auth/wrong-password':
-                            errorMessage = 'Senha incorreta';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = 'E-mail inválido';
-                            break;
-                        case 'auth/too-many-requests':
-                            errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
-                            break;
-                        default:
-                            errorMessage = error.message;
-                    }
-                    
-                    showNotification('Erro de Login', errorMessage);
-                })
-                .finally(() => {
-                    setLoading('loginBtn', false);
-                });
+            try {
+                const userCredential = await window.firebaseFunctions.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                console.log('Login successful:', userCredential.user.uid);
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Erro no login';
+                
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Usuário não encontrado';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Senha incorreta';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showNotification('Erro de Login', errorMessage);
+            } finally {
+                setLoading('loginBtn', false);
+            }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const name = document.getElementById('registerName').value.trim();
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
@@ -777,59 +812,69 @@
 
             setLoading('registerBtn', true);
 
-            // Create user account
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    
-                    // Generate TalkID
-                    const talkId = generateTalkId();
-                    
-                    // Create user profile in Firestore
-                    const userProfile = {
-                        uid: user.uid,
-                        name: name,
-                        email: email,
-                        avatar: avatar || null,
-                        talkId: talkId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                        isOnline: true
-                    };
+            try {
+                // Create user account
+                const userCredential = await window.firebaseFunctions.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+                
+                // Generate unique TalkID
+                let talkId;
+                let isUnique = false;
+                
+                while (!isUnique) {
+                    talkId = generateTalkId();
+                    const talkIdQuery = window.firebaseFunctions.query(
+                        window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                        window.firebaseFunctions.where('talkId', '==', talkId)
+                    );
+                    const talkIdSnapshot = await window.firebaseFunctions.getDocs(talkIdQuery);
+                    isUnique = talkIdSnapshot.empty;
+                }
+                
+                // Create user profile in Firestore
+                const userProfile = {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    avatar: avatar || null,
+                    talkId: talkId,
+                    createdAt: window.firebaseFunctions.serverTimestamp(),
+                    lastSeen: window.firebaseFunctions.serverTimestamp(),
+                    isOnline: true
+                };
 
-                    return db.collection('users').doc(user.uid).set(userProfile);
-                })
-                .then(() => {
-                    showNotification('Sucesso', 'Conta criada com sucesso!');
-                    // Auto-login after registration
-                    auth.currentUser && loadUserData(auth.currentUser);
-                })
-                .catch((error) => {
-                    console.error('Registration error:', error);
-                    let errorMessage = 'Erro no cadastro';
-                    
-                    switch(error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMessage = 'Este e-mail já está em uso';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = 'E-mail inválido';
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = 'Senha muito fraca';
-                            break;
-                        default:
-                            errorMessage = error.message;
-                    }
-                    
-                    showNotification('Erro de Cadastro', errorMessage);
-                })
-                .finally(() => {
-                    setLoading('registerBtn', false);
-                });
+                await window.firebaseFunctions.setDoc(
+                    window.firebaseFunctions.doc(window.firebaseDb, 'users', user.uid),
+                    userProfile
+                );
+
+                showNotification('Sucesso', `Conta criada! Seu TalkID é: ${talkId}`);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'Erro no cadastro';
+                
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este e-mail já está em uso';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'E-mail inválido';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Senha muito fraca';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showNotification('Erro de Cadastro', errorMessage);
+            } finally {
+                setLoading('registerBtn', false);
+            }
         }
 
-        function resetPassword() {
+        async function resetPassword() {
             const email = document.getElementById('loginEmail').value.trim();
             
             if (!email) {
@@ -837,78 +882,132 @@
                 return;
             }
 
-            auth.sendPasswordResetEmail(email)
-                .then(() => {
-                    showNotification('E-mail Enviado', 'Verifique sua caixa de entrada');
-                })
-                .catch((error) => {
-                    showNotification('Erro', 'Erro ao enviar e-mail de recuperação');
-                });
+            try {
+                await window.firebaseFunctions.sendPasswordResetEmail(window.firebaseAuth, email);
+                showNotification('E-mail Enviado', 'Verifique sua caixa de entrada');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showNotification('Erro', 'Erro ao enviar e-mail de recuperação');
+            }
         }
 
-        function logout() {
-            // Update user status to offline
-            if (currentUser && currentUserData) {
-                db.collection('users').doc(currentUser.uid).update({
-                    isOnline: false,
-                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
+        async function logout() {
+            try {
+                // Update user status to offline
+                if (currentUser && currentUserData) {
+                    await window.firebaseFunctions.updateDoc(
+                        window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUser.uid),
+                        {
+                            isOnline: false,
+                            lastSeen: window.firebaseFunctions.serverTimestamp()
+                        }
+                    );
+                }
 
-            // Disconnect all connections
-            activeConnections.forEach(conn => conn.close());
-            activeConnections.clear();
-            
-            if (currentCall) {
-                currentCall.close();
-            }
-            
-            if (peer) {
-                peer.destroy();
-            }
+                // Disconnect all connections
+                activeConnections.forEach(conn => conn.close());
+                activeConnections.clear();
+                
+                if (currentCall) {
+                    currentCall.close();
+                }
+                
+                if (peer) {
+                    peer.destroy();
+                }
 
-            // Sign out from Firebase
-            auth.signOut().then(() => {
-                // Reset UI
-                document.getElementById('mainApp').classList.add('hidden');
-                document.getElementById('authScreen').classList.remove('hidden');
-                showLoginForm();
+                // Sign out from Firebase
+                await window.firebaseFunctions.signOut(window.firebaseAuth);
 
-                // Clear variables
+                // Reset variables
                 currentUser = null;
                 currentUserData = null;
                 myTalkId = null;
                 peer = null;
 
                 showNotification('Logout', 'Você foi desconectado');
-            });
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('Erro', 'Erro ao fazer logout');
+            }
         }
 
         // Load user data from Firestore
-        function loadUserData(user) {
-            db.collection('users').doc(user.uid).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        currentUser = user;
-                        currentUserData = doc.data();
-                        myTalkId = currentUserData.talkId;
+        async function loadUserData(user) {
+            try {
+                console.log('Loading user data for:', user.uid);
+                const userDocRef = window.firebaseFunctions.doc(window.firebaseDb, 'users', user.uid);
+                const userDoc = await window.firebaseFunctions.getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    currentUser = user;
+                    currentUserData = userDoc.data();
+                    myTalkId = currentUserData.talkId;
 
-                        // Update online status
-                        db.collection('users').doc(user.uid).update({
-                            isOnline: true,
-                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                    console.log('User data loaded:', currentUserData);
 
-                        initializeUserSession();
-                    } else {
-                        showNotification('Erro', 'Dados do usuário não encontrados');
-                        logout();
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error loading user data:', error);
-                    showNotification('Erro', 'Erro ao carregar dados do usuário');
-                });
+                    // Update online status
+                    await window.firebaseFunctions.updateDoc(userDocRef, {
+                        isOnline: true,
+                        lastSeen: window.firebaseFunctions.serverTimestamp()
+                    });
+
+                    initializeUserSession();
+                } else {
+                    console.log('User document does not exist, creating new profile...');
+                    // If user document doesn't exist, create it (for existing auth users)
+                    await createUserProfile(user);
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showNotification('Erro', 'Erro ao carregar dados do usuário. Tentando novamente...');
+                
+                // Retry after 2 seconds
+                setTimeout(() => {
+                    loadUserData(user);
+                }, 2000);
+            }
+        }
+
+        // Create user profile for existing auth users
+        async function createUserProfile(user) {
+            try {
+                // Generate unique TalkID
+                let talkId;
+                let isUnique = false;
+                
+                while (!isUnique) {
+                    talkId = generateTalkId();
+                    const talkIdQuery = window.firebaseFunctions.query(
+                        window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                        window.firebaseFunctions.where('talkId', '==', talkId)
+                    );
+                    const talkIdSnapshot = await window.firebaseFunctions.getDocs(talkIdQuery);
+                    isUnique = talkIdSnapshot.empty;
+                }
+
+                const userProfile = {
+                    uid: user.uid,
+                    name: user.displayName || user.email.split('@')[0],
+                    email: user.email,
+                    avatar: user.photoURL || null,
+                    talkId: talkId,
+                    createdAt: window.firebaseFunctions.serverTimestamp(),
+                    lastSeen: window.firebaseFunctions.serverTimestamp(),
+                    isOnline: true
+                };
+
+                await window.firebaseFunctions.setDoc(
+                    window.firebaseFunctions.doc(window.firebaseDb, 'users', user.uid),
+                    userProfile
+                );
+
+                // Load the newly created profile
+                loadUserData(user);
+            } catch (error) {
+                console.error('Error creating user profile:', error);
+                showNotification('Erro', 'Erro ao criar perfil do usuário');
+            }
         }
 
         function initializeUserSession() {
@@ -945,30 +1044,6 @@
             }
         }
 
-        // Generate unique TalkID
-        function generateTalkId() {
-            return Math.floor(1000 + Math.random() * 9000).toString();
-        }
-
-        // Check if TalkID exists
-        async function checkTalkIdExists(talkId) {
-            const snapshot = await db.collection('users').where('talkId', '==', talkId).get();
-            return !snapshot.empty;
-        }
-
-        // Generate unique TalkID that doesn't exist
-        async function generateUniqueTalkId() {
-            let talkId;
-            let exists = true;
-            
-            while (exists) {
-                talkId = generateTalkId();
-                exists = await checkTalkIdExists(talkId);
-            }
-            
-            return talkId;
-        }
-
         // Initialize PeerJS with Firebase TalkID
         function initializePeerWithTalkId() {
             const customPeerId = `talkhub_${myTalkId}_${currentUser.uid}`;
@@ -1003,36 +1078,46 @@
 
         // Load user chats from Firestore
         function loadUserChats() {
-            db.collection('chats')
-                .where('participants', 'array-contains', currentUser.uid)
-                .orderBy('lastMessageTime', 'desc')
-                .onSnapshot((snapshot) => {
-                    userChats.clear();
-                    
-                    snapshot.forEach((doc) => {
-                        const chatData = doc.data();
-                        userChats.set(doc.id, { id: doc.id, ...chatData });
-                    });
-                    
-                    loadChats();
+            if (!currentUser) return;
+
+            const chatsQuery = window.firebaseFunctions.query(
+                window.firebaseFunctions.collection(window.firebaseDb, 'chats'),
+                window.firebaseFunctions.where('participants', 'array-contains', currentUser.uid),
+                window.firebaseFunctions.orderBy('lastMessageTime', 'desc')
+            );
+
+            window.firebaseFunctions.onSnapshot(chatsQuery, (snapshot) => {
+                userChats.clear();
+                
+                snapshot.forEach((doc) => {
+                    const chatData = doc.data();
+                    userChats.set(doc.id, { id: doc.id, ...chatData });
                 });
+                
+                loadChats();
+            });
         }
 
         // Load registered users from Firestore
         function loadRegisteredUsers() {
-            db.collection('users')
-                .where('isOnline', '==', true)
-                .onSnapshot((snapshot) => {
-                    const users = [];
-                    snapshot.forEach((doc) => {
-                        const userData = doc.data();
-                        if (userData.uid !== currentUser.uid) {
-                            users.push({ id: doc.id, ...userData });
-                        }
-                    });
-                    
-                    updateOnlineUsersList(users);
+            if (!currentUser) return;
+
+            const usersQuery = window.firebaseFunctions.query(
+                window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                window.firebaseFunctions.where('isOnline', '==', true)
+            );
+
+            window.firebaseFunctions.onSnapshot(usersQuery, (snapshot) => {
+                const users = [];
+                snapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    if (userData.uid !== currentUser.uid) {
+                        users.push({ id: doc.id, ...userData });
+                    }
                 });
+                
+                updateOnlineUsersList(users);
+            });
         }
 
         function updateOnlineUsersList(users) {
@@ -1093,8 +1178,8 @@
             });
         }
 
-        // Connection Management
-        function connectToUser() {
+        // Connection Functions
+        async function connectToUser() {
             const targetTalkId = document.getElementById('targetTalkId').value.trim();
             if (!targetTalkId || targetTalkId.length !== 4) {
                 showNotification('Erro', 'Digite um TalkID válido (4 dígitos)');
@@ -1111,24 +1196,28 @@
                 return;
             }
 
-            // Find user by TalkID in Firestore
-            db.collection('users').where('talkId', '==', targetTalkId).get()
-                .then((snapshot) => {
-                    if (snapshot.empty) {
-                        showNotification('Erro', 'TalkID não encontrado');
-                        return;
-                    }
+            try {
+                // Find user by TalkID in Firestore
+                const usersQuery = window.firebaseFunctions.query(
+                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                    window.firebaseFunctions.where('talkId', '==', targetTalkId)
+                );
+                const snapshot = await window.firebaseFunctions.getDocs(usersQuery);
 
-                    const targetUserData = snapshot.docs[0].data();
-                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
-                    
-                    const conn = peer.connect(targetPeerId);
-                    handleConnection(conn, targetTalkId, targetUserData);
-                })
-                .catch((error) => {
-                    console.error('Error finding user:', error);
-                    showNotification('Erro', 'Erro ao buscar usuário');
-                });
+                if (snapshot.empty) {
+                    showNotification('Erro', 'TalkID não encontrado');
+                    return;
+                }
+
+                const targetUserData = snapshot.docs[0].data();
+                const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
+                
+                const conn = peer.connect(targetPeerId);
+                handleConnection(conn, targetTalkId, targetUserData);
+            } catch (error) {
+                console.error('Error finding user:', error);
+                showNotification('Erro', 'Erro ao buscar usuário');
+            }
         }
 
         function connectToUserByTalkId(talkId) {
@@ -1196,28 +1285,43 @@
         }
 
         // Create or update chat in Firestore
-        function createOrUpdateChat(targetTalkId, targetUserData) {
-            const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
-            
-            db.collection('chats').doc(chatId).set({
-                participants: [currentUser.uid, targetUserData.uid],
-                participantNames: [currentUserData.name, targetUserData.name],
-                participantTalkIds: [myTalkId, targetTalkId],
-                lastMessage: '',
-                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+        async function createOrUpdateChat(targetTalkId, targetUserData) {
+            try {
+                const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
+                
+                await window.firebaseFunctions.setDoc(
+                    window.firebaseFunctions.doc(window.firebaseDb, 'chats', chatId),
+                    {
+                        participants: [currentUser.uid, targetUserData.uid],
+                        participantNames: [currentUserData.name, targetUserData.name],
+                        participantTalkIds: [myTalkId, targetTalkId],
+                        lastMessage: '',
+                        lastMessageTime: window.firebaseFunctions.serverTimestamp(),
+                        createdAt: window.firebaseFunctions.serverTimestamp()
+                    },
+                    { merge: true }
+                );
+            } catch (error) {
+                console.error('Error creating/updating chat:', error);
+            }
         }
 
-        function createOrUpdateChatFromData(data) {
-            // Find user data by TalkID
-            db.collection('users').where('talkId', '==', data.talkId).get()
-                .then((snapshot) => {
-                    if (!snapshot.empty) {
-                        const userData = snapshot.docs[0].data();
-                        createOrUpdateChat(data.talkId, userData);
-                    }
-                });
+        async function createOrUpdateChatFromData(data) {
+            try {
+                // Find user data by TalkID
+                const usersQuery = window.firebaseFunctions.query(
+                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                    window.firebaseFunctions.where('talkId', '==', data.talkId)
+                );
+                const snapshot = await window.firebaseFunctions.getDocs(usersQuery);
+                
+                if (!snapshot.empty) {
+                    const userData = snapshot.docs[0].data();
+                    createOrUpdateChat(data.talkId, userData);
+                }
+            } catch (error) {
+                console.error('Error creating chat from data:', error);
+            }
         }
 
         // Message Handling
@@ -1255,28 +1359,41 @@
             document.getElementById('messageText').value = '';
         }
 
-        function saveMessageToFirestore(targetTalkId, messageData) {
-            // Find target user to get their UID
-            db.collection('users').where('talkId', '==', targetTalkId).get()
-                .then((snapshot) => {
-                    if (!snapshot.empty) {
-                        const targetUserData = snapshot.docs[0].data();
-                        const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
-                        
-                        // Add message to messages collection
-                        db.collection('chats').doc(chatId).collection('messages').add({
+        async function saveMessageToFirestore(targetTalkId, messageData) {
+            try {
+                // Find target user to get their UID
+                const usersQuery = window.firebaseFunctions.query(
+                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                    window.firebaseFunctions.where('talkId', '==', targetTalkId)
+                );
+                const snapshot = await window.firebaseFunctions.getDocs(usersQuery);
+                
+                if (!snapshot.empty) {
+                    const targetUserData = snapshot.docs[0].data();
+                    const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
+                    
+                    // Add message to messages collection
+                    await window.firebaseFunctions.addDoc(
+                        window.firebaseFunctions.collection(window.firebaseDb, 'chats', chatId, 'messages'),
+                        {
                             ...messageData,
                             chatId: chatId,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                            timestamp: window.firebaseFunctions.serverTimestamp()
+                        }
+                    );
 
-                        // Update chat last message
-                        db.collection('chats').doc(chatId).update({
+                    // Update chat last message
+                    await window.firebaseFunctions.updateDoc(
+                        window.firebaseFunctions.doc(window.firebaseDb, 'chats', chatId),
+                        {
                             lastMessage: messageData.message,
-                            lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                });
+                            lastMessageTime: window.firebaseFunctions.serverTimestamp()
+                        }
+                    );
+                }
+            } catch (error) {
+                console.error('Error saving message:', error);
+            }
         }
 
         function handleIncomingData(data, fromTalkId) {
@@ -1549,7 +1666,7 @@
             startVideoCall(talkId);
         }
 
-        function startVideoCall(targetTalkId = null) {
+        async function startVideoCall(targetTalkId = null) {
             if (!targetTalkId) {
                 targetTalkId = getCurrentTalkId();
             }
@@ -1559,39 +1676,44 @@
                 return;
             }
 
-            // Find target user data
-            db.collection('users').where('talkId', '==', targetTalkId).get()
-                .then((snapshot) => {
-                    if (snapshot.empty) {
-                        showNotification('Erro', 'Usuário não encontrado');
-                        return;
-                    }
+            try {
+                // Find target user data
+                const usersQuery = window.firebaseFunctions.query(
+                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                    window.firebaseFunctions.where('talkId', '==', targetTalkId)
+                );
+                const snapshot = await window.firebaseFunctions.getDocs(usersQuery);
 
-                    const targetUserData = snapshot.docs[0].data();
-                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
+                if (snapshot.empty) {
+                    showNotification('Erro', 'Usuário não encontrado');
+                    return;
+                }
 
-                    navigator.mediaDevices.getUserMedia({
-                        video: true,
-                        audio: true
-                    }).then(function(stream) {
-                        localStream = stream;
+                const targetUserData = snapshot.docs[0].data();
+                const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
 
-                        document.getElementById('videoCallOverlay').classList.remove('hidden');
-                        document.getElementById('callUserName').textContent = targetUserData.name;
-                        document.getElementById('callStatus').textContent = 'Chamando...';
-                        document.getElementById('localVideo').srcObject = stream;
-
-                        const call = peer.call(targetPeerId, stream);
-                        handleCall(call);
-
-                    }).catch(function(err) {
-                        console.error('Error accessing media:', err);
-                        showNotification('Erro', 'Não foi possível acessar câmera/microfone');
-                    });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
                 });
+
+                localStream = stream;
+
+                document.getElementById('videoCallOverlay').classList.remove('hidden');
+                document.getElementById('callUserName').textContent = targetUserData.name;
+                document.getElementById('callStatus').textContent = 'Chamando...';
+                document.getElementById('localVideo').srcObject = stream;
+
+                const call = peer.call(targetPeerId, stream);
+                handleCall(call);
+
+            } catch (error) {
+                console.error('Error starting video call:', error);
+                showNotification('Erro', 'Não foi possível iniciar a chamada');
+            }
         }
 
-        function startAudioCall(targetTalkId = null) {
+        async function startAudioCall(targetTalkId = null) {
             if (!targetTalkId) {
                 targetTalkId = getCurrentTalkId();
             }
@@ -1601,35 +1723,40 @@
                 return;
             }
 
-            db.collection('users').where('talkId', '==', targetTalkId).get()
-                .then((snapshot) => {
-                    if (snapshot.empty) {
-                        showNotification('Erro', 'Usuário não encontrado');
-                        return;
-                    }
+            try {
+                const usersQuery = window.firebaseFunctions.query(
+                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                    window.firebaseFunctions.where('talkId', '==', targetTalkId)
+                );
+                const snapshot = await window.firebaseFunctions.getDocs(usersQuery);
 
-                    const targetUserData = snapshot.docs[0].data();
-                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
+                if (snapshot.empty) {
+                    showNotification('Erro', 'Usuário não encontrado');
+                    return;
+                }
 
-                    navigator.mediaDevices.getUserMedia({
-                        video: false,
-                        audio: true
-                    }).then(function(stream) {
-                        localStream = stream;
+                const targetUserData = snapshot.docs[0].data();
+                const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
 
-                        document.getElementById('videoCallOverlay').classList.remove('hidden');
-                        document.getElementById('callUserName').textContent = targetUserData.name;
-                        document.getElementById('callStatus').textContent = 'Chamando...';
-                        document.getElementById('localVideo').style.display = 'none';
-
-                        const call = peer.call(targetPeerId, stream);
-                        handleCall(call);
-
-                    }).catch(function(err) {
-                        console.error('Error accessing media:', err);
-                        showNotification('Erro', 'Não foi possível acessar microfone');
-                    });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: false,
+                    audio: true
                 });
+
+                localStream = stream;
+
+                document.getElementById('videoCallOverlay').classList.remove('hidden');
+                document.getElementById('callUserName').textContent = targetUserData.name;
+                document.getElementById('callStatus').textContent = 'Chamando...';
+                document.getElementById('localVideo').style.display = 'none';
+
+                const call = peer.call(targetPeerId, stream);
+                handleCall(call);
+
+            } catch (error) {
+                console.error('Error starting audio call:', error);
+                showNotification('Erro', 'Não foi possível iniciar a chamada');
+            }
         }
 
         function handleCall(call) {
@@ -1657,7 +1784,7 @@
             const peerData = extractDataFromPeerId(call.peer);
             
             document.getElementById('incomingCallModal').classList.remove('hidden');
-            document.getElementById('incomingCallName').textContent = peerData.talkId;
+            document.getElementById('incomingCallName').textContent = `TalkID ${peerData.talkId}`;
             document.getElementById('incomingCallTalkId').textContent = `TalkID: ${peerData.talkId}`;
             document.getElementById('incomingCallInitials').textContent = peerData.talkId;
 
@@ -1839,9 +1966,11 @@
             }
 
             // Show chats
-            const sortedChats = Array.from(userChats.values()).sort((a, b) => 
-                (b.lastMessageTime?.toDate() || new Date()) - (a.lastMessageTime?.toDate() || new Date())
-            );
+            const sortedChats = Array.from(userChats.values()).sort((a, b) => {
+                const aTime = a.lastMessageTime?.toDate() || new Date(0);
+                const bTime = b.lastMessageTime?.toDate() || new Date(0);
+                return bTime - aTime;
+            });
 
             sortedChats.forEach(chat => {
                 const otherParticipantIndex = chat.participants.findIndex(uid => uid !== currentUser.uid);
@@ -1912,6 +2041,15 @@
                     <p class="text-gray-500 text-xs mt-1">Em breve grupos com Firebase</p>
                 </div>
             `;
+        }
+
+        // File handling functions
+        function handleFileSelect(event) {
+            showNotification('Arquivos', 'Envio de arquivos em desenvolvimento');
+        }
+
+        function addFileMessage(data, sender, isOwn) {
+            addMessage(`📎 ${data.fileName || 'Arquivo'}`, sender, isOwn, data.timestamp);
         }
 
         // Utility Functions
@@ -2004,7 +2142,6 @@
                 document.getElementById('targetTalkId').value = searchTerm;
             }
 
-            // Filter visible items
             const activeTab = document.querySelector('.tab-btn.text-white')?.textContent.toLowerCase().trim() || 'chats';
             let items = [];
 
@@ -2055,34 +2192,39 @@
         // Settings Functions
         function showSettings() {
             document.getElementById('settingsModal').classList.remove('hidden');
-            document.getElementById('settingsAvatarUrl').value = currentUserData.avatar || '';
+            if (currentUserData) {
+                document.getElementById('settingsAvatarUrl').value = currentUserData.avatar || '';
+            }
         }
 
         function closeSettingsModal() {
             document.getElementById('settingsModal').classList.add('hidden');
         }
 
-        function saveSettings() {
+        async function saveSettings() {
             const newAvatar = document.getElementById('settingsAvatarUrl').value.trim();
             notificationsEnabled = document.getElementById('notificationsEnabled').checked;
             soundEnabled = document.getElementById('soundEnabled').checked;
 
-            // Update user profile in Firestore
-            const updates = {
-                avatar: newAvatar || null
-            };
+            try {
+                // Update user profile in Firestore
+                const updates = {
+                    avatar: newAvatar || null
+                };
 
-            db.collection('users').doc(currentUser.uid).update(updates)
-                .then(() => {
-                    currentUserData.avatar = newAvatar;
-                    updateUserInterface();
-                    closeSettingsModal();
-                    showNotification('Configurações', 'Perfil atualizado com sucesso');
-                })
-                .catch((error) => {
-                    console.error('Error updating profile:', error);
-                    showNotification('Erro', 'Erro ao atualizar perfil');
-                });
+                await window.firebaseFunctions.updateDoc(
+                    window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUser.uid),
+                    updates
+                );
+
+                currentUserData.avatar = newAvatar;
+                updateUserInterface();
+                closeSettingsModal();
+                showNotification('Configurações', 'Perfil atualizado com sucesso');
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showNotification('Erro', 'Erro ao atualizar perfil');
+            }
         }
 
         // Helper Functions
@@ -2163,47 +2305,15 @@
         }
 
         function showProfileModal() {
-            showNotification('Perfil', `Nome: ${currentUserData.name}\nTalkID: ${myTalkId}\nE-mail: ${currentUserData.email}`);
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // File handling functions (simplified)
-        function handleFileSelect(event) {
-            // File handling implementation
-            showNotification('Arquivos', 'Seleção de arquivos em desenvolvimento');
-        }
-
-        function addFileMessage(data, sender, isOwn) {
-            // File message implementation
-            addMessage(`📎 ${data.fileName || 'Arquivo'}`, sender, isOwn, data.timestamp);
-        }
-
-        // Firebase Auth State Observer
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log('User is signed in:', user);
-                if (!currentUser) {
-                    loadUserData(user);
-                }
-            } else {
-                console.log('User is signed out');
-                document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('authScreen').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
+            if (currentUserData) {
+                showNotification('Perfil', `Nome: ${currentUserData.name}\nTalkID: ${myTalkId}\nE-mail: ${currentUserData.email}`);
             }
-        });
+        }
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Show loading screen initially
-            document.getElementById('loadingScreen').classList.remove('hidden');
+            // Wait for Firebase to initialize
+            waitForFirebase();
 
             // Request notification permission
             if ('Notification' in window && Notification.permission === 'default') {
