@@ -6,6 +6,13 @@
     <title>TalkHub - Plataforma de Comunicação</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -73,6 +80,37 @@
         @keyframes typing {
             0%, 60%, 100% { opacity: 0.3; }
             30% { opacity: 1; }
+        }
+        
+        .file-preview {
+            max-width: 300px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .connected {
+            background: #10b981;
+            color: white;
+        }
+        
+        .disconnected {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .reconnecting {
+            background: #f59e0b;
+            color: white;
         }
         
         /* Mobile optimizations */
@@ -195,17 +233,34 @@
             50% { transform: scale(1.1); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 min-h-screen">
     
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full loading-spinner"></div>
+            <p class="text-white">Inicializando TalkHub...</p>
+        </div>
+    </div>
+
     <!-- Connection Status -->
     <div id="connectionStatus" class="fixed top-4 right-4 glass-effect px-3 py-2 rounded-lg text-white text-sm z-50 hidden">
         Status
     </div>
 
     <!-- Login/Register Screen -->
-    <div id="authScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div id="authScreen" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="glass-effect rounded-2xl p-8 w-full max-w-md">
             <div class="text-center mb-8">
                 <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
@@ -220,13 +275,16 @@
             <!-- Login Form -->
             <div id="loginForm" class="space-y-4">
                 <h2 class="text-xl font-bold text-white text-center mb-4">Entrar</h2>
-                <input type="text" id="loginUsername" placeholder="Nome de usuário" 
+                <input type="email" id="loginEmail" placeholder="E-mail" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                 <input type="password" id="loginPassword" placeholder="Senha" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <button onclick="handleLogin()" class="w-full p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-semibold hover:from-primary/80 hover:to-secondary/80 transition-all">
+                <button onclick="handleLogin()" id="loginBtn" class="w-full p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-semibold hover:from-primary/80 hover:to-secondary/80 transition-all">
                     Entrar
                 </button>
+                <div class="text-center">
+                    <button onclick="resetPassword()" class="text-sm text-primary hover:text-primary/80">Esqueci minha senha</button>
+                </div>
                 <button onclick="showRegisterForm()" class="w-full p-3 border border-white/30 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
                     Criar Nova Conta
                 </button>
@@ -235,17 +293,17 @@
             <!-- Register Form -->
             <div id="registerForm" class="space-y-4 hidden">
                 <h2 class="text-xl font-bold text-white text-center mb-4">Criar Conta</h2>
-                <input type="text" id="registerUsername" placeholder="Nome de usuário" 
+                <input type="text" id="registerName" placeholder="Nome completo" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                 <input type="email" id="registerEmail" placeholder="E-mail" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <input type="password" id="registerPassword" placeholder="Senha" 
+                <input type="password" id="registerPassword" placeholder="Senha (mín. 6 caracteres)" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                 <input type="password" id="registerConfirmPassword" placeholder="Confirmar Senha" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                 <input type="url" id="registerAvatar" placeholder="URL do Avatar (opcional)" 
                        class="w-full p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                <button onclick="handleRegister()" class="w-full p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all">
+                <button onclick="handleRegister()" id="registerBtn" class="w-full p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all">
                     Criar Conta
                 </button>
                 <button onclick="showLoginForm()" class="w-full p-3 border border-white/30 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
@@ -282,7 +340,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center cursor-pointer relative" onclick="showProfileModal()">
-                            <img id="userAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d745109d-4ec6-4f9f-bc44-142013312ac9.png">
+                            <img id="userAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/aaab90e4-4391-4e1c-b0b4-ebe1b992e112.png" alt="Avatar do usuário logado com foto de perfil personalizada" class="w-full h-full rounded-full object-cover hidden">
                             <span class="text-white font-bold text-lg" id="userInitials">U</span>
                             <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full online-indicator"></span>
                         </div>
@@ -324,7 +382,7 @@
             <!-- Search -->
             <div class="p-4">
                 <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Buscar usuário por TalkID..." 
+                    <input type="text" id="searchInput" placeholder="Buscar por TalkID ou nome..." 
                            class="w-full p-3 pl-10 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary text-sm"
                            oninput="searchItems()">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -375,7 +433,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                            <img id="chatUserAvatar" src="" alt="Avatar do usuário" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/04c9bc58-a177-4153-b740-39e163c053bd.png">
+                            <img id="chatUserAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/779a7113-e262-4f38-b255-1117b73629d5.png" alt="Avatar do usuário no chat atual mostrando foto de perfil" class="w-full h-full rounded-full object-cover hidden">
                             <span class="text-white font-bold text-sm" id="chatUserInitials">U</span>
                             <span id="chatUserOnlineIndicator" class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
                         </div>
@@ -439,7 +497,7 @@
                     </button>
                     <button onclick="toggleRecording()" id="recordBtn" class="p-2 md:p-3 hover:bg-white/10 rounded-lg transition-all">
                         <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 115 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M7 4a3 3 0 716 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 115 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/>
                         </svg>
                     </button>
                     <input type="text" id="messageText" placeholder="Digite sua mensagem..." 
@@ -534,7 +592,7 @@
     <div id="incomingCallModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-60 hidden">
         <div class="glass-effect p-6 md:p-8 rounded-2xl text-center max-w-sm mx-4">
             <div class="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center relative">
-                <img id="incomingCallAvatar" src="" alt="Avatar" class="w-full h-full rounded-full object-cover hidden"/ src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/022b34fd-f106-4eb3-9ba6-21f9b9568d58.png">
+                <img id="incomingCallAvatar" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a6418fbd-50f5-44d1-83b8-e61e108cc8ab.png" alt="Avatar do usuário fazendo chamada recebida" class="w-full h-full rounded-full object-cover hidden">
                 <span class="text-white text-xl md:text-2xl font-bold" id="incomingCallInitials">U</span>
                 <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
             </div>
@@ -563,8 +621,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-white block mb-2">Nome de usuário</label>
-                    <input type="text" id="settingsUsername" 
-                           class="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-primary">
+                    <input type="text" id="settingsUsername" readonly
+                           class="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 cursor-not-allowed">
                 </div>
                 <div>
                     <label class="text-white block mb-2">Avatar URL</label>
@@ -609,13 +667,29 @@
     </div>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIga7wwaaC_M9G0sDoBE-95E9yG2aAdzU",
+            authDomain: "mapp-20fb8.firebaseapp.com",
+            projectId: "mapp-20fb8",
+            storageBucket: "mapp-20fb8.firebasestorage.app",
+            messagingSenderId: "276853120997",
+            appId: "1:276853120997:web:2792f7cd2d330724c0d90c",
+            measurementId: "G-7K3RDGJCC2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const analytics = firebase.analytics();
+
         // Global Variables
         let peer = null;
         let currentConnection = null;
         let currentCall = null;
         let currentUser = null;
-        let currentUserEmail = null;
-        let currentUserAvatar = null;
+        let currentUserData = null;
         let myTalkId = null;
         let localStream = null;
         let isMuted = false;
@@ -624,7 +698,6 @@
         let callStartTime = null;
         let activeConnections = new Map();
         let userChats = new Map();
-        let registeredUsers = new Map();
         let notificationsEnabled = true;
         let soundEnabled = true;
         let typingTimeout = null;
@@ -633,59 +706,67 @@
         let recordingTimer = null;
         let recordingStartTime = null;
 
-        // User Management System
-        function loadRegisteredUsers() {
-            const saved = localStorage.getItem('talkhub_users');
-            if (saved) {
-                const users = JSON.parse(saved);
-                users.forEach(user => {
-                    registeredUsers.set(user.username, user);
-                });
+        // Firebase Authentication Functions
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showNotification('Erro', 'Preencha todos os campos');
+                return;
             }
-        }
 
-        function saveRegisteredUsers() {
-            const users = Array.from(registeredUsers.values());
-            localStorage.setItem('talkhub_users', JSON.stringify(users));
-        }
+            setLoading('loginBtn', true);
 
-        function generateTalkId() {
-            // Generate a simple 4-digit ID
-            const existingIds = Array.from(registeredUsers.values()).map(u => u.talkId);
-            let newId;
-            
-            do {
-                newId = Math.floor(1000 + Math.random() * 9000).toString();
-            } while (existingIds.includes(newId));
-            
-            return newId;
-        }
-
-        function generatePeerIdFromTalkId(talkId) {
-            return `talkhub_${talkId}_${Date.now()}`;
-        }
-
-        // Authentication Functions
-        function showRegisterForm() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        }
-
-        function showLoginForm() {
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log('Login successful:', user);
+                    loadUserData(user);
+                })
+                .catch((error) => {
+                    console.error('Login error:', error);
+                    let errorMessage = 'Erro no login';
+                    
+                    switch(error.code) {
+                        case 'auth/user-not-found':
+                            errorMessage = 'Usuário não encontrado';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Senha incorreta';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'E-mail inválido';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
+                            break;
+                        default:
+                            errorMessage = error.message;
+                    }
+                    
+                    showNotification('Erro de Login', errorMessage);
+                })
+                .finally(() => {
+                    setLoading('loginBtn', false);
+                });
         }
 
         function handleRegister() {
-            const username = document.getElementById('registerUsername').value.trim();
+            const name = document.getElementById('registerName').value.trim();
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
             const avatar = document.getElementById('registerAvatar').value.trim();
 
             // Validation
-            if (!username || !email || !password) {
+            if (!name || !email || !password) {
                 showNotification('Erro', 'Preencha todos os campos obrigatórios');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('Erro', 'A senha deve ter pelo menos 6 caracteres');
                 return;
             }
 
@@ -694,155 +775,203 @@
                 return;
             }
 
-            if (registeredUsers.has(username)) {
-                showNotification('Erro', 'Nome de usuário já existe');
-                return;
-            }
+            setLoading('registerBtn', true);
 
-            // Check if email already exists
-            const emailExists = Array.from(registeredUsers.values()).some(user => user.email === email);
-            if (emailExists) {
-                showNotification('Erro', 'E-mail já cadastrado');
-                return;
-            }
+            // Create user account
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Generate TalkID
+                    const talkId = generateTalkId();
+                    
+                    // Create user profile in Firestore
+                    const userProfile = {
+                        uid: user.uid,
+                        name: name,
+                        email: email,
+                        avatar: avatar || null,
+                        talkId: talkId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        isOnline: true
+                    };
 
-            // Create new user
-            const talkId = generateTalkId();
-            const newUser = {
-                username: username,
-                email: email,
-                password: btoa(password), // Simple encoding (not secure for production)
-                talkId: talkId,
-                avatar: avatar,
-                createdAt: new Date().toISOString(),
-                lastLogin: null
-            };
-
-            registeredUsers.set(username, newUser);
-            saveRegisteredUsers();
-
-            showNotification('Conta Criada', `Sua conta foi criada! Seu TalkID é: ${talkId}`);
-            
-            // Auto login
-            currentUser = username;
-            currentUserEmail = email;
-            currentUserAvatar = avatar;
-            myTalkId = talkId;
-            
-            initializeUserSession();
+                    return db.collection('users').doc(user.uid).set(userProfile);
+                })
+                .then(() => {
+                    showNotification('Sucesso', 'Conta criada com sucesso!');
+                    // Auto-login after registration
+                    auth.currentUser && loadUserData(auth.currentUser);
+                })
+                .catch((error) => {
+                    console.error('Registration error:', error);
+                    let errorMessage = 'Erro no cadastro';
+                    
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'Este e-mail já está em uso';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'E-mail inválido';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'Senha muito fraca';
+                            break;
+                        default:
+                            errorMessage = error.message;
+                    }
+                    
+                    showNotification('Erro de Cadastro', errorMessage);
+                })
+                .finally(() => {
+                    setLoading('registerBtn', false);
+                });
         }
 
-        function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                showNotification('Erro', 'Preencha todos os campos');
+        function resetPassword() {
+            const email = document.getElementById('loginEmail').value.trim();
+            
+            if (!email) {
+                showNotification('Erro', 'Digite seu e-mail primeiro');
                 return;
             }
 
-            const user = registeredUsers.get(username);
-            if (!user) {
-                showNotification('Erro', 'Usuário não encontrado');
-                return;
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showNotification('E-mail Enviado', 'Verifique sua caixa de entrada');
+                })
+                .catch((error) => {
+                    showNotification('Erro', 'Erro ao enviar e-mail de recuperação');
+                });
+        }
+
+        function logout() {
+            // Update user status to offline
+            if (currentUser && currentUserData) {
+                db.collection('users').doc(currentUser.uid).update({
+                    isOnline: false,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
 
-            if (atob(user.password) !== password) {
-                showNotification('Erro', 'Senha incorreta');
-                return;
+            // Disconnect all connections
+            activeConnections.forEach(conn => conn.close());
+            activeConnections.clear();
+            
+            if (currentCall) {
+                currentCall.close();
+            }
+            
+            if (peer) {
+                peer.destroy();
             }
 
-            // Update last login
-            user.lastLogin = new Date().toISOString();
-            registeredUsers.set(username, user);
-            saveRegisteredUsers();
+            // Sign out from Firebase
+            auth.signOut().then(() => {
+                // Reset UI
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('authScreen').classList.remove('hidden');
+                showLoginForm();
 
-            // Set current user
-            currentUser = username;
-            currentUserEmail = user.email;
-            currentUserAvatar = user.avatar;
-            myTalkId = user.talkId;
+                // Clear variables
+                currentUser = null;
+                currentUserData = null;
+                myTalkId = null;
+                peer = null;
 
-            showNotification('Login realizado', `Bem-vindo de volta, ${username}!`);
-            initializeUserSession();
+                showNotification('Logout', 'Você foi desconectado');
+            });
+        }
+
+        // Load user data from Firestore
+        function loadUserData(user) {
+            db.collection('users').doc(user.uid).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        currentUser = user;
+                        currentUserData = doc.data();
+                        myTalkId = currentUserData.talkId;
+
+                        // Update online status
+                        db.collection('users').doc(user.uid).update({
+                            isOnline: true,
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        initializeUserSession();
+                    } else {
+                        showNotification('Erro', 'Dados do usuário não encontrados');
+                        logout();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading user data:', error);
+                    showNotification('Erro', 'Erro ao carregar dados do usuário');
+                });
         }
 
         function initializeUserSession() {
-            // Save session
-            const session = {
-                username: currentUser,
-                email: currentUserEmail,
-                avatar: currentUserAvatar,
-                talkId: myTalkId,
-                loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('talkhub_session', JSON.stringify(session));
-
             // Show main app
+            document.getElementById('loadingScreen').classList.add('hidden');
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
 
             // Update UI
             updateUserInterface();
             
-            // Initialize peer with custom ID
+            // Initialize peer with TalkID
             initializePeerWithTalkId();
+            
+            // Load user chats and contacts
+            loadUserChats();
+            loadRegisteredUsers();
+
+            showNotification('Bem-vindo', `Olá, ${currentUserData.name}!`);
         }
 
         function updateUserInterface() {
-            document.getElementById('currentUserName').textContent = currentUser;
-            document.getElementById('userInitials').textContent = currentUser.charAt(0).toUpperCase();
-            document.getElementById('mobileTitle').textContent = currentUser;
+            document.getElementById('currentUserName').textContent = currentUserData.name;
+            document.getElementById('userInitials').textContent = currentUserData.name.charAt(0).toUpperCase();
+            document.getElementById('mobileTitle').textContent = currentUserData.name;
             document.getElementById('myTalkId').textContent = myTalkId;
             document.getElementById('welcomeTalkId').textContent = myTalkId;
+            document.getElementById('settingsUsername').value = currentUserData.name;
 
-            if (currentUserAvatar) {
-                document.getElementById('userAvatar').src = currentUserAvatar;
+            if (currentUserData.avatar) {
+                document.getElementById('userAvatar').src = currentUserData.avatar;
                 document.getElementById('userAvatar').classList.remove('hidden');
                 document.getElementById('userInitials').classList.add('hidden');
             }
-
-            loadUserData();
         }
 
-        function loadUserData() {
-            loadChats();
-            loadGroups();
+        // Generate unique TalkID
+        function generateTalkId() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        function logout() {
-            // Clear session
-            localStorage.removeItem('talkhub_session');
+        // Check if TalkID exists
+        async function checkTalkIdExists(talkId) {
+            const snapshot = await db.collection('users').where('talkId', '==', talkId).get();
+            return !snapshot.empty;
+        }
+
+        // Generate unique TalkID that doesn't exist
+        async function generateUniqueTalkId() {
+            let talkId;
+            let exists = true;
             
-            // Disconnect everything
-            if (currentCall) {
-                currentCall.close();
+            while (exists) {
+                talkId = generateTalkId();
+                exists = await checkTalkIdExists(talkId);
             }
-            activeConnections.forEach(conn => conn.close());
-            activeConnections.clear();
             
-            if (peer) {
-                peer.destroy();
-            }
-
-            // Reset UI
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('authScreen').classList.remove('hidden');
-            showLoginForm();
-
-            // Clear variables
-            currentUser = null;
-            currentUserEmail = null;
-            currentUserAvatar = null;
-            myTalkId = null;
-            peer = null;
-
-            showNotification('Logout', 'Você foi desconectado');
+            return talkId;
         }
 
-        // Initialize PeerJS with TalkID
+        // Initialize PeerJS with Firebase TalkID
         function initializePeerWithTalkId() {
-            const customPeerId = generatePeerIdFromTalkId(myTalkId);
+            const customPeerId = `talkhub_${myTalkId}_${currentUser.uid}`;
             
             peer = new Peer(customPeerId, {
                 config: {
@@ -855,7 +984,7 @@
 
             peer.on('open', function(id) {
                 console.log('Peer conectado com ID:', id);
-                showNotification('Sistema Pronto', `TalkID: ${myTalkId} ativo`);
+                showNotification('Sistema Pronto', `TalkID ${myTalkId} ativo`);
             });
 
             peer.on('connection', function(conn) {
@@ -872,7 +1001,99 @@
             });
         }
 
-        // Connection Functions
+        // Load user chats from Firestore
+        function loadUserChats() {
+            db.collection('chats')
+                .where('participants', 'array-contains', currentUser.uid)
+                .orderBy('lastMessageTime', 'desc')
+                .onSnapshot((snapshot) => {
+                    userChats.clear();
+                    
+                    snapshot.forEach((doc) => {
+                        const chatData = doc.data();
+                        userChats.set(doc.id, { id: doc.id, ...chatData });
+                    });
+                    
+                    loadChats();
+                });
+        }
+
+        // Load registered users from Firestore
+        function loadRegisteredUsers() {
+            db.collection('users')
+                .where('isOnline', '==', true)
+                .onSnapshot((snapshot) => {
+                    const users = [];
+                    snapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (userData.uid !== currentUser.uid) {
+                            users.push({ id: doc.id, ...userData });
+                        }
+                    });
+                    
+                    updateOnlineUsersList(users);
+                });
+        }
+
+        function updateOnlineUsersList(users) {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-400 text-sm">Nenhum usuário online</p>
+                        <p class="text-gray-500 text-xs mt-1">Convide amigos para usar o TalkHub</p>
+                    </div>
+                `;
+                return;
+            }
+
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'p-3 hover:bg-white/10 rounded-xl cursor-pointer transition-all';
+
+                let avatarHtml = `
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">${user.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                `;
+
+                if (user.avatar) {
+                    avatarHtml = `<img src="${user.avatar}" alt="${user.name}" class="w-10 h-10 rounded-full object-cover">`;
+                }
+
+                userDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            ${avatarHtml}
+                            <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium">${user.name}</h4>
+                            <p class="text-gray-400 text-xs">TalkID: ${user.talkId}</p>
+                            <p class="text-xs text-green-400">Online agora</p>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="connectToUserByTalkId('${user.talkId}')" class="p-2 bg-primary hover:bg-primary/80 rounded text-white text-xs">
+                                💬
+                            </button>
+                            <button onclick="callUserByTalkId('${user.talkId}')" class="p-2 bg-green-500 hover:bg-green-600 rounded text-white text-xs">
+                                📹
+                            </button>
+                        </div>
+                    </div>
+                `;
+                usersList.appendChild(userDiv);
+            });
+        }
+
+        // Connection Management
         function connectToUser() {
             const targetTalkId = document.getElementById('targetTalkId').value.trim();
             if (!targetTalkId || targetTalkId.length !== 4) {
@@ -885,50 +1106,62 @@
                 return;
             }
 
-            // Find all possible peer IDs for this TalkID
-            const targetPeerId = findPeerIdByTalkId(targetTalkId);
-            
             if (activeConnections.has(targetTalkId)) {
                 showChatInterface(targetTalkId);
                 return;
             }
 
-            // Try to connect
-            const conn = peer.connect(targetPeerId);
-            handleConnection(conn, targetTalkId);
+            // Find user by TalkID in Firestore
+            db.collection('users').where('talkId', '==', targetTalkId).get()
+                .then((snapshot) => {
+                    if (snapshot.empty) {
+                        showNotification('Erro', 'TalkID não encontrado');
+                        return;
+                    }
+
+                    const targetUserData = snapshot.docs[0].data();
+                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
+                    
+                    const conn = peer.connect(targetPeerId);
+                    handleConnection(conn, targetTalkId, targetUserData);
+                })
+                .catch((error) => {
+                    console.error('Error finding user:', error);
+                    showNotification('Erro', 'Erro ao buscar usuário');
+                });
         }
 
-        function findPeerIdByTalkId(talkId) {
-            // For now, we'll use a predictable pattern
-            // In a real app, you'd have a server to map TalkIDs to PeerIDs
-            return `talkhub_${talkId}_${Date.now()}`;
+        function connectToUserByTalkId(talkId) {
+            document.getElementById('targetTalkId').value = talkId;
+            connectToUser();
         }
 
-        function handleConnection(conn, talkId) {
+        function handleConnection(conn, targetTalkId, targetUserData) {
             conn.on('open', function() {
-                activeConnections.set(talkId, conn);
-                showChatInterface(talkId);
+                activeConnections.set(targetTalkId, conn);
+                showChatInterface(targetTalkId);
 
                 // Send user profile
                 conn.send({
                     type: 'profile',
-                    username: currentUser,
+                    username: currentUserData.name,
                     talkId: myTalkId,
-                    avatar: currentUserAvatar,
-                    email: currentUserEmail
+                    avatar: currentUserData.avatar,
+                    uid: currentUser.uid
                 });
 
-                addToChats(talkId, '', new Date().toISOString());
-                showNotification('Conectado', `Conectado ao TalkID ${talkId}`);
+                updateChatHeader(targetUserData);
+                createOrUpdateChat(targetTalkId, targetUserData);
+                showNotification('Conectado', `Conectado com ${targetUserData.name}`);
             });
 
             conn.on('data', function(data) {
-                handleIncomingData(data, talkId);
+                handleIncomingData(data, targetTalkId);
             });
 
             conn.on('close', function() {
-                activeConnections.delete(talkId);
-                showNotification('Desconectado', `TalkID ${talkId} desconectou`);
+                activeConnections.delete(targetTalkId);
+                showNotification('Desconectado', `Conexão encerrada`);
             });
 
             conn.on('error', function(err) {
@@ -938,35 +1171,22 @@
         }
 
         function handleIncomingConnection(conn) {
-            // Extract TalkID from peer ID or wait for profile data
-            const tempId = conn.peer;
-            
             conn.on('data', function(data) {
                 if (data.type === 'profile') {
                     const talkId = data.talkId;
                     activeConnections.set(talkId, conn);
                     
-                    // Store user profile
-                    const userProfile = {
-                        username: data.username,
-                        talkId: data.talkId,
-                        avatar: data.avatar,
-                        email: data.email
-                    };
-                    
-                    // Auto-show chat
                     showChatInterface(talkId);
-                    updateChatHeader(userProfile);
-                    
-                    addToChats(talkId, '', new Date().toISOString());
-                    showNotification('Nova Conexão', `${data.username} (${talkId}) se conectou`);
+                    updateChatHeaderFromData(data);
+                    createOrUpdateChatFromData(data);
+                    showNotification('Nova Conexão', `${data.username} se conectou`);
                 } else {
-                    handleIncomingData(data, getTalkIdFromConnection(conn));
+                    const talkId = extractTalkIdFromConnection(conn);
+                    handleIncomingData(data, talkId);
                 }
             });
 
             conn.on('close', function() {
-                // Remove from active connections
                 activeConnections.forEach((connection, talkId) => {
                     if (connection === conn) {
                         activeConnections.delete(talkId);
@@ -975,56 +1195,29 @@
             });
         }
 
-        function getTalkIdFromConnection(conn) {
-            for (let [talkId, connection] of activeConnections) {
-                if (connection === conn) {
-                    return talkId;
-                }
-            }
-            return null;
+        // Create or update chat in Firestore
+        function createOrUpdateChat(targetTalkId, targetUserData) {
+            const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
+            
+            db.collection('chats').doc(chatId).set({
+                participants: [currentUser.uid, targetUserData.uid],
+                participantNames: [currentUserData.name, targetUserData.name],
+                participantTalkIds: [myTalkId, targetTalkId],
+                lastMessage: '',
+                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
         }
 
-        // Chat Interface Functions
-        function showChatInterface(talkId) {
-            document.getElementById('welcomeScreen').classList.add('hidden');
-            document.getElementById('chatHeader').classList.remove('hidden');
-            document.getElementById('chatMessages').classList.remove('hidden');
-            document.getElementById('messageInput').classList.remove('hidden');
-
-            // Load chat messages
-            loadChatMessages(talkId);
-
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
-            }
-        }
-
-        function updateChatHeader(userProfile) {
-            document.getElementById('chatUserName').textContent = userProfile.username;
-            document.getElementById('chatUserTalkId').textContent = `TalkID: ${userProfile.talkId}`;
-            document.getElementById('chatUserInitials').textContent = userProfile.username.charAt(0).toUpperCase();
-            document.getElementById('mobileTitle').textContent = userProfile.username;
-
-            if (userProfile.avatar) {
-                document.getElementById('chatUserAvatar').src = userProfile.avatar;
-                document.getElementById('chatUserAvatar').classList.remove('hidden');
-            }
-        }
-
-        function disconnectFromUser() {
-            const currentTalkId = getCurrentTalkId();
-            if (currentTalkId && activeConnections.has(currentTalkId)) {
-                activeConnections.get(currentTalkId).close();
-                activeConnections.delete(currentTalkId);
-            }
-
-            // Hide chat interface
-            document.getElementById('welcomeScreen').classList.remove('hidden');
-            document.getElementById('chatHeader').classList.add('hidden');
-            document.getElementById('chatMessages').classList.add('hidden');
-            document.getElementById('messageInput').classList.add('hidden');
-            document.getElementById('mobileTitle').textContent = 'TalkHub';
+        function createOrUpdateChatFromData(data) {
+            // Find user data by TalkID
+            db.collection('users').where('talkId', '==', data.talkId).get()
+                .then((snapshot) => {
+                    if (!snapshot.empty) {
+                        const userData = snapshot.docs[0].data();
+                        createOrUpdateChat(data.talkId, userData);
+                    }
+                });
         }
 
         // Message Handling
@@ -1047,28 +1240,51 @@
             const messageData = {
                 type: 'message',
                 message: messageText,
-                username: currentUser,
+                username: currentUserData.name,
                 talkId: myTalkId,
+                uid: currentUser.uid,
                 timestamp: new Date().toISOString()
             };
 
             conn.send(messageData);
-            addMessage(messageText, currentUser, true, messageData.timestamp);
-            addToChats(targetTalkId, messageText, messageData.timestamp);
+            addMessage(messageText, currentUserData.name, true, messageData.timestamp);
+            
+            // Save message to Firestore
+            saveMessageToFirestore(targetTalkId, messageData);
 
             document.getElementById('messageText').value = '';
-            
-            // Save message to localStorage
-            saveMessage(targetTalkId, messageData);
+        }
+
+        function saveMessageToFirestore(targetTalkId, messageData) {
+            // Find target user to get their UID
+            db.collection('users').where('talkId', '==', targetTalkId).get()
+                .then((snapshot) => {
+                    if (!snapshot.empty) {
+                        const targetUserData = snapshot.docs[0].data();
+                        const chatId = [currentUser.uid, targetUserData.uid].sort().join('_');
+                        
+                        // Add message to messages collection
+                        db.collection('chats').doc(chatId).collection('messages').add({
+                            ...messageData,
+                            chatId: chatId,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        // Update chat last message
+                        db.collection('chats').doc(chatId).update({
+                            lastMessage: messageData.message,
+                            lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
         }
 
         function handleIncomingData(data, fromTalkId) {
             switch(data.type) {
                 case 'message':
                     addMessage(data.message, data.username, false, data.timestamp);
-                    addToChats(fromTalkId, data.message, data.timestamp);
-                    saveMessage(fromTalkId, data);
-                    showNotification(`${data.username} (${data.talkId})`, data.message);
+                    saveMessageToFirestore(myTalkId, data);
+                    showNotification(`${data.username}`, data.message);
                     playNotificationSound();
                     break;
 
@@ -1082,16 +1298,12 @@
 
                 case 'audio':
                     addAudioMessage(data, data.username, false);
-                    addToChats(fromTalkId, '🎵 Mensagem de áudio', data.timestamp);
-                    saveMessage(fromTalkId, data);
                     showNotification(`${data.username}`, 'Enviou um áudio');
                     playNotificationSound();
                     break;
 
                 case 'file':
                     addFileMessage(data, data.username, false);
-                    addToChats(fromTalkId, `📎 ${data.fileName}`, data.timestamp);
-                    saveMessage(fromTalkId, data);
                     showNotification(`${data.username}`, 'Enviou um arquivo');
                     break;
             }
@@ -1128,7 +1340,7 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Audio Messaging - Fixed
+        // Audio Messaging
         function toggleRecording() {
             if (recordingState) {
                 stopRecording();
@@ -1156,8 +1368,9 @@
                                 type: 'audio',
                                 audioData: reader.result,
                                 duration: (Date.now() - recordingStartTime) / 1000,
-                                username: currentUser,
+                                username: currentUserData.name,
                                 talkId: myTalkId,
+                                uid: currentUser.uid,
                                 timestamp: new Date().toISOString()
                             };
 
@@ -1165,9 +1378,7 @@
                             const conn = activeConnections.get(targetTalkId);
                             if (conn) {
                                 conn.send(audioData);
-                                addAudioMessage(audioData, currentUser, true);
-                                addToChats(targetTalkId, '🎵 Mensagem de áudio', audioData.timestamp);
-                                saveMessage(targetTalkId, audioData);
+                                addAudioMessage(audioData, currentUserData.name, true);
                             }
                         };
 
@@ -1209,13 +1420,11 @@
                 mediaRecorder.stop();
                 recordingState = false;
 
-                // Clear timer
                 if (recordingTimer) {
                     clearInterval(recordingTimer);
                     recordingTimer = null;
                 }
 
-                // Reset UI
                 document.getElementById('recordingIndicator').classList.add('hidden');
                 document.getElementById('recordBtn').innerHTML = `
                     <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -1278,7 +1487,6 @@
                     }
                 });
 
-                // Reset all other buttons
                 document.querySelectorAll('.audio-play-btn').forEach(btn => {
                     btn.setAttribute('data-playing', 'false');
                     btn.innerHTML = `
@@ -1288,7 +1496,6 @@
                     `;
                 });
 
-                // Play audio
                 audio.play();
                 button.setAttribute('data-playing', 'true');
                 button.innerHTML = `
@@ -1297,7 +1504,6 @@
                     </svg>
                 `;
 
-                // Update progress
                 const updateProgress = () => {
                     if (!audio.paused && !audio.ended) {
                         const percent = (audio.currentTime / audio.duration) * 100;
@@ -1317,7 +1523,6 @@
                     progress.style.width = '0%';
                 };
             } else {
-                // Stop audio
                 audio.pause();
                 audio.currentTime = 0;
                 button.setAttribute('data-playing', 'false');
@@ -1327,137 +1532,6 @@
                     </svg>
                 `;
                 progress.style.width = '0%';
-            }
-        }
-
-        // File Handling
-        function handleFileSelect(event) {
-            const files = event.target.files;
-            const filePreview = document.getElementById('filePreview');
-            filePreview.innerHTML = '';
-
-            Array.from(files).forEach(file => {
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    showNotification('Erro', 'Arquivo muito grande (máx: 10MB)');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.createElement('div');
-                    preview.className = 'flex items-center space-x-3 p-3 bg-white/10 rounded-lg mb-2';
-
-                    preview.innerHTML = `
-                        <div class="w-10 h-10 bg-primary/20 rounded flex items-center justify-center">
-                            <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-white text-sm">${file.name}</p>
-                            <p class="text-gray-400 text-xs">${formatFileSize(file.size)}</p>
-                        </div>
-                        <button onclick="sendFile('${file.name}', '${file.type}', ${file.size}, '${e.target.result}')" class="p-2 bg-primary hover:bg-primary/80 rounded-lg transition-all">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
-                            </svg>
-                        </button>
-                        <button onclick="removeFilePreview(this)" class="p-2 hover:bg-white/10 rounded-lg transition-all">
-                            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    `;
-
-                    filePreview.appendChild(preview);
-                    filePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function sendFile(fileName, fileType, fileSize, fileData) {
-            const targetTalkId = getCurrentTalkId();
-            const conn = activeConnections.get(targetTalkId);
-            
-            if (conn) {
-                const messageData = {
-                    type: 'file',
-                    fileName: fileName,
-                    fileType: fileType,
-                    fileSize: fileSize,
-                    fileData: fileData,
-                    username: currentUser,
-                    talkId: myTalkId,
-                    timestamp: new Date().toISOString()
-                };
-
-                conn.send(messageData);
-                addFileMessage(messageData, currentUser, true);
-                addToChats(targetTalkId, `📎 ${fileName}`, messageData.timestamp);
-                saveMessage(targetTalkId, messageData);
-
-                // Remove preview
-                document.getElementById('filePreview').innerHTML = '';
-                document.getElementById('filePreview').classList.add('hidden');
-            }
-        }
-
-        function addFileMessage(fileData, sender, isOwn) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`;
-
-            const time = fileData.timestamp ? new Date(fileData.timestamp).toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : new Date().toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            let filePreview = '';
-            if (fileData.fileType && fileData.fileType.startsWith('image/')) {
-                filePreview = `
-                    <img src="${fileData.fileData}" alt="${fileData.fileName}" 
-                         class="max-w-full max-h-48 rounded-lg mb-2 cursor-pointer" 
-                         onclick="openImageModal('${fileData.fileData}', '${fileData.fileName}')">
-                `;
-            } else {
-                filePreview = `
-                    <div class="flex items-center space-x-2 p-3 bg-white/10 rounded-lg mb-2">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-                        </svg>
-                        <div class="flex-1">
-                            <p class="text-white text-sm">${fileData.fileName}</p>
-                            <p class="text-gray-400 text-xs">${formatFileSize(fileData.fileSize)}</p>
-                        </div>
-                        <a href="${fileData.fileData}" download="${fileData.fileName}" class="p-1 text-primary hover:text-primary/80">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                            </svg>
-                        </a>
-                    </div>
-                `;
-            }
-
-            messageDiv.innerHTML = `
-                <div class="message-bubble ${isOwn ? 'bg-primary' : 'bg-white/10'} p-3 rounded-2xl">
-                    ${!isOwn ? `<p class="text-xs text-gray-300 mb-1 font-medium">${sender}</p>` : ''}
-                    ${filePreview}
-                    <p class="text-xs ${isOwn ? 'text-primary-200' : 'text-gray-400'} mt-1">${time}</p>
-                </div>
-            `;
-
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function removeFilePreview(button) {
-            button.parentElement.remove();
-            if (document.getElementById('filePreview').children.length === 0) {
-                document.getElementById('filePreview').classList.add('hidden');
             }
         }
 
@@ -1471,35 +1545,50 @@
             startVideoCall(targetTalkId);
         }
 
+        function callUserByTalkId(talkId) {
+            startVideoCall(talkId);
+        }
+
         function startVideoCall(targetTalkId = null) {
             if (!targetTalkId) {
                 targetTalkId = getCurrentTalkId();
             }
 
             if (!targetTalkId) {
-                showNotification('Erro', 'Conecte-se a um usuário primeiro');
+                showNotification('Erro', 'TalkID inválido');
                 return;
             }
 
-            navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            }).then(function(stream) {
-                localStream = stream;
+            // Find target user data
+            db.collection('users').where('talkId', '==', targetTalkId).get()
+                .then((snapshot) => {
+                    if (snapshot.empty) {
+                        showNotification('Erro', 'Usuário não encontrado');
+                        return;
+                    }
 
-                document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = `TalkID ${targetTalkId}`;
-                document.getElementById('callStatus').textContent = 'Chamando...';
-                document.getElementById('localVideo').srcObject = stream;
+                    const targetUserData = snapshot.docs[0].data();
+                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
 
-                const targetPeerId = findPeerIdByTalkId(targetTalkId);
-                const call = peer.call(targetPeerId, stream);
-                handleCall(call);
+                    navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: true
+                    }).then(function(stream) {
+                        localStream = stream;
 
-            }).catch(function(err) {
-                console.error('Error accessing media:', err);
-                showNotification('Erro', 'Não foi possível acessar câmera/microfone');
-            });
+                        document.getElementById('videoCallOverlay').classList.remove('hidden');
+                        document.getElementById('callUserName').textContent = targetUserData.name;
+                        document.getElementById('callStatus').textContent = 'Chamando...';
+                        document.getElementById('localVideo').srcObject = stream;
+
+                        const call = peer.call(targetPeerId, stream);
+                        handleCall(call);
+
+                    }).catch(function(err) {
+                        console.error('Error accessing media:', err);
+                        showNotification('Erro', 'Não foi possível acessar câmera/microfone');
+                    });
+                });
         }
 
         function startAudioCall(targetTalkId = null) {
@@ -1508,29 +1597,39 @@
             }
 
             if (!targetTalkId) {
-                showNotification('Erro', 'Conecte-se a um usuário primeiro');
+                showNotification('Erro', 'TalkID inválido');
                 return;
             }
 
-            navigator.mediaDevices.getUserMedia({
-                video: false,
-                audio: true
-            }).then(function(stream) {
-                localStream = stream;
+            db.collection('users').where('talkId', '==', targetTalkId).get()
+                .then((snapshot) => {
+                    if (snapshot.empty) {
+                        showNotification('Erro', 'Usuário não encontrado');
+                        return;
+                    }
 
-                document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = `TalkID ${targetTalkId}`;
-                document.getElementById('callStatus').textContent = 'Chamando...';
-                document.getElementById('localVideo').style.display = 'none';
+                    const targetUserData = snapshot.docs[0].data();
+                    const targetPeerId = `talkhub_${targetTalkId}_${targetUserData.uid}`;
 
-                const targetPeerId = findPeerIdByTalkId(targetTalkId);
-                const call = peer.call(targetPeerId, stream);
-                handleCall(call);
+                    navigator.mediaDevices.getUserMedia({
+                        video: false,
+                        audio: true
+                    }).then(function(stream) {
+                        localStream = stream;
 
-            }).catch(function(err) {
-                console.error('Error accessing media:', err);
-                showNotification('Erro', 'Não foi possível acessar microfone');
-            });
+                        document.getElementById('videoCallOverlay').classList.remove('hidden');
+                        document.getElementById('callUserName').textContent = targetUserData.name;
+                        document.getElementById('callStatus').textContent = 'Chamando...';
+                        document.getElementById('localVideo').style.display = 'none';
+
+                        const call = peer.call(targetPeerId, stream);
+                        handleCall(call);
+
+                    }).catch(function(err) {
+                        console.error('Error accessing media:', err);
+                        showNotification('Erro', 'Não foi possível acessar microfone');
+                    });
+                });
         }
 
         function handleCall(call) {
@@ -1555,22 +1654,22 @@
         }
 
         function handleIncomingCall(call) {
-            // Extract TalkID from metadata or peer ID
-            const fromTalkId = extractTalkIdFromPeerId(call.peer);
+            const peerData = extractDataFromPeerId(call.peer);
             
             document.getElementById('incomingCallModal').classList.remove('hidden');
-            document.getElementById('incomingCallName').textContent = `TalkID ${fromTalkId}`;
-            document.getElementById('incomingCallTalkId').textContent = `TalkID: ${fromTalkId}`;
-            document.getElementById('incomingCallInitials').textContent = fromTalkId;
-            document.getElementById('incomingCallType').textContent = 'Chamada recebida';
+            document.getElementById('incomingCallName').textContent = peerData.talkId;
+            document.getElementById('incomingCallTalkId').textContent = `TalkID: ${peerData.talkId}`;
+            document.getElementById('incomingCallInitials').textContent = peerData.talkId;
 
             window.pendingCall = call;
         }
 
-        function extractTalkIdFromPeerId(peerId) {
-            // Extract TalkID from peer ID pattern: talkhub_XXXX_timestamp
-            const match = peerId.match(/talkhub_(\d{4})_/);
-            return match ? match[1] : 'Desconhecido';
+        function extractDataFromPeerId(peerId) {
+            const match = peerId.match(/talkhub_(\d{4})_(.+)/);
+            return {
+                talkId: match ? match[1] : 'Desconhecido',
+                uid: match ? match[2] : null
+            };
         }
 
         function acceptCall() {
@@ -1586,7 +1685,6 @@
                 localStream = stream;
 
                 document.getElementById('videoCallOverlay').classList.remove('hidden');
-                document.getElementById('callUserName').textContent = extractTalkIdFromPeerId(call.peer);
                 document.getElementById('localVideo').srcObject = stream;
 
                 call.answer(stream);
@@ -1627,13 +1725,8 @@
                 callTimer = null;
             }
 
-            // Reset call controls
             isMuted = false;
             isVideoOn = true;
-            document.getElementById('muteBtn').classList.remove('bg-red-500');
-            document.getElementById('muteBtn').classList.add('bg-gray-600');
-            document.getElementById('videoBtn').classList.remove('bg-red-500');
-            document.getElementById('videoBtn').classList.add('bg-gray-600');
         }
 
         function toggleMute() {
@@ -1671,49 +1764,64 @@
             }, 1000);
         }
 
-        // Data Management
-        function addToChats(talkId, lastMessage, timestamp) {
-            const profile = getUserProfileByTalkId(talkId);
-            
-            userChats.set(talkId, {
-                talkId: talkId,
-                username: profile?.username || `TalkID ${talkId}`,
-                avatar: profile?.avatar,
-                lastMessage: lastMessage,
-                timestamp: timestamp,
-                unread: 0
-            });
+        // UI Management Functions
+        function showChatInterface(targetTalkId) {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('chatHeader').classList.remove('hidden');
+            document.getElementById('chatMessages').classList.remove('hidden');
+            document.getElementById('messageInput').classList.remove('hidden');
 
-            saveChats();
-            loadChats();
-        }
+            loadChatMessages(targetTalkId);
 
-        function getUserProfileByTalkId(talkId) {
-            // Look through registered users for this TalkID
-            for (let user of registeredUsers.values()) {
-                if (user.talkId === talkId) {
-                    return user;
-                }
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
             }
-            return null;
         }
 
-        function saveChats() {
-            const chatsArray = Array.from(userChats.values());
-            localStorage.setItem('talkhub_user_chats', JSON.stringify(chatsArray));
+        function updateChatHeader(userData) {
+            document.getElementById('chatUserName').textContent = userData.name;
+            document.getElementById('chatUserTalkId').textContent = `TalkID: ${userData.talkId}`;
+            document.getElementById('chatUserInitials').textContent = userData.name.charAt(0).toUpperCase();
+            document.getElementById('mobileTitle').textContent = userData.name;
+
+            if (userData.avatar) {
+                document.getElementById('chatUserAvatar').src = userData.avatar;
+                document.getElementById('chatUserAvatar').classList.remove('hidden');
+            }
+        }
+
+        function updateChatHeaderFromData(data) {
+            document.getElementById('chatUserName').textContent = data.username;
+            document.getElementById('chatUserTalkId').textContent = `TalkID: ${data.talkId}`;
+            document.getElementById('chatUserInitials').textContent = data.username.charAt(0).toUpperCase();
+            document.getElementById('mobileTitle').textContent = data.username;
+
+            if (data.avatar) {
+                document.getElementById('chatUserAvatar').src = data.avatar;
+                document.getElementById('chatUserAvatar').classList.remove('hidden');
+            }
+        }
+
+        function loadChatMessages(targetTalkId) {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = `
+                <div class="flex-1 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-400 text-lg">Início da conversa</p>
+                        <p class="text-gray-500 text-sm mt-1">Envie a primeira mensagem</p>
+                    </div>
+                </div>
+            `;
         }
 
         function loadChats() {
             const chatsList = document.getElementById('chatsList');
             chatsList.innerHTML = '';
-
-            const savedChats = localStorage.getItem('talkhub_user_chats');
-            if (savedChats) {
-                const chats = JSON.parse(savedChats);
-                chats.forEach(chat => {
-                    userChats.set(chat.talkId, chat);
-                });
-            }
 
             if (userChats.size === 0) {
                 chatsList.innerHTML = `
@@ -1730,14 +1838,25 @@
                 return;
             }
 
-            // Sort chats by timestamp
+            // Show chats
             const sortedChats = Array.from(userChats.values()).sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
+                (b.lastMessageTime?.toDate() || new Date()) - (a.lastMessageTime?.toDate() || new Date())
             );
 
             sortedChats.forEach(chat => {
-                const chatItem = createChatItem(chat);
-                chatsList.appendChild(chatItem);
+                const otherParticipantIndex = chat.participants.findIndex(uid => uid !== currentUser.uid);
+                if (otherParticipantIndex !== -1) {
+                    const otherName = chat.participantNames[otherParticipantIndex];
+                    const otherTalkId = chat.participantTalkIds[otherParticipantIndex];
+                    
+                    const chatItem = createChatItem({
+                        name: otherName,
+                        talkId: otherTalkId,
+                        lastMessage: chat.lastMessage,
+                        timestamp: chat.lastMessageTime?.toDate()
+                    });
+                    chatsList.appendChild(chatItem);
+                }
             });
         }
 
@@ -1753,34 +1872,26 @@
                 }
             };
 
-            const time = chat.timestamp ? new Date(chat.timestamp).toLocaleTimeString('pt-BR', {
+            const time = chat.timestamp ? chat.timestamp.toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
             }) : '';
 
-            let avatarHtml = `
-                <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold text-sm">${chat.username.charAt(0).toUpperCase()}</span>
-                </div>
-            `;
-
-            if (chat.avatar) {
-                avatarHtml = `<img src="${chat.avatar}" alt="${chat.username}" class="w-10 h-10 rounded-full object-cover">`;
-            }
-
             div.innerHTML = `
                 <div class="flex items-center space-x-3">
                     <div class="relative">
-                        ${avatarHtml}
+                        <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">${chat.name.charAt(0).toUpperCase()}</span>
+                        </div>
                         <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-white font-medium truncate">${chat.username}</h4>
+                            <h4 class="text-white font-medium truncate">${chat.name}</h4>
                             <span class="text-xs text-gray-400 flex-shrink-0 ml-2">${time}</span>
                         </div>
                         <p class="text-xs text-gray-500">TalkID: ${chat.talkId}</p>
-                        <p class="text-sm text-gray-400 truncate">${chat.lastMessage || 'Clique para conectar'}</p>
+                        <p class="text-sm text-gray-400 truncate">${chat.lastMessage || 'Clique para conversar'}</p>
                     </div>
                 </div>
             `;
@@ -1798,61 +1909,22 @@
                         </svg>
                     </div>
                     <p class="text-gray-400 text-sm">Grupos em desenvolvimento</p>
-                    <p class="text-gray-500 text-xs mt-1">Em breve você poderá criar grupos</p>
+                    <p class="text-gray-500 text-xs mt-1">Em breve grupos com Firebase</p>
                 </div>
             `;
         }
 
-        function loadChatMessages(talkId) {
-            const messagesContainer = document.getElementById('chatMessages');
-            messagesContainer.innerHTML = '';
-
-            // Load messages from localStorage
-            const savedMessages = localStorage.getItem(`talkhub_messages_${myTalkId}_${talkId}`);
-            if (savedMessages) {
-                const messages = JSON.parse(savedMessages);
-                messages.forEach(msg => {
-                    if (msg.type === 'message') {
-                        addMessage(msg.message, msg.username, msg.username === currentUser, msg.timestamp);
-                    } else if (msg.type === 'audio') {
-                        addAudioMessage(msg, msg.username, msg.username === currentUser);
-                    } else if (msg.type === 'file') {
-                        addFileMessage(msg, msg.username, msg.username === currentUser);
-                    }
-                });
-            } else {
-                messagesContainer.innerHTML = `
-                    <div class="flex-1 flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <p class="text-gray-400 text-lg">Nenhuma mensagem ainda</p>
-                            <p class="text-gray-500 text-sm mt-1">Envie a primeira mensagem</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function saveMessage(talkId, messageData) {
-            const key = `talkhub_messages_${myTalkId}_${talkId}`;
-            const savedMessages = JSON.parse(localStorage.getItem(key) || '[]');
-            savedMessages.push(messageData);
-            localStorage.setItem(key, JSON.stringify(savedMessages));
-        }
-
         // Utility Functions
         function getCurrentTalkId() {
-            const chatUserName = document.getElementById('chatUserName').textContent;
-            
-            // Try to find TalkID from active connections
-            for (let [talkId, conn] of activeConnections) {
-                return talkId;
+            return document.getElementById('targetTalkId').value.trim();
+        }
+
+        function extractTalkIdFromConnection(conn) {
+            for (let [talkId, connection] of activeConnections) {
+                if (connection === conn) {
+                    return talkId;
+                }
             }
-            
             return null;
         }
 
@@ -1868,11 +1940,11 @@
             const conn = activeConnections.get(targetTalkId);
 
             if (conn) {
-                conn.send({ type: 'typing', username: currentUser, talkId: myTalkId });
+                conn.send({ type: 'typing', username: currentUserData.name, talkId: myTalkId });
 
                 clearTimeout(typingTimeout);
                 typingTimeout = setTimeout(() => {
-                    conn.send({ type: 'stop-typing', username: currentUser, talkId: myTalkId });
+                    conn.send({ type: 'stop-typing', username: currentUserData.name, talkId: myTalkId });
                 }, 1000);
             }
         }
@@ -1888,18 +1960,15 @@
         }
 
         function showTab(tabName) {
-            // Hide all tabs
             document.getElementById('chatsList').classList.add('hidden');
             document.getElementById('groupsList').classList.add('hidden');
             document.getElementById('usersList').classList.add('hidden');
 
-            // Remove active class from all buttons
             document.querySelectorAll('.tab-btn, .tab-mobile').forEach(btn => {
                 btn.classList.remove('bg-primary/20', 'border-b-2', 'border-primary', 'text-white');
                 btn.classList.add('text-gray-400');
             });
 
-            // Show selected tab and activate buttons
             document.getElementById(tabName + 'List').classList.remove('hidden');
 
             const tabButtons = document.querySelectorAll(`[onclick="showTab('${tabName}')"]`);
@@ -1911,7 +1980,6 @@
                 }
             });
 
-            // Load data
             switch(tabName) {
                 case 'chats':
                     loadChats();
@@ -1920,81 +1988,19 @@
                     loadGroups();
                     break;
                 case 'users':
-                    loadRegisteredUsersList();
-                    break;
+                    break; // Users are loaded automatically via Firestore listener
             }
         }
 
-        function loadRegisteredUsersList() {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '';
-
-            const users = Array.from(registeredUsers.values()).filter(u => u.username !== currentUser);
-
-            if (users.length === 0) {
-                usersList.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-500/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400 text-sm">Nenhum usuário registrado</p>
-                        <p class="text-gray-500 text-xs mt-1">Compartilhe o TalkHub com amigos</p>
-                    </div>
-                `;
-                return;
-            }
-
-            users.forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.className = 'p-3 hover:bg-white/10 rounded-xl cursor-pointer transition-all';
-
-                let avatarHtml = `
-                    <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">${user.username.charAt(0).toUpperCase()}</span>
-                    </div>
-                `;
-
-                if (user.avatar) {
-                    avatarHtml = `<img src="${user.avatar}" alt="${user.username}" class="w-10 h-10 rounded-full object-cover">`;
-                }
-
-                userDiv.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        ${avatarHtml}
-                        <div class="flex-1">
-                            <h4 class="text-white font-medium">${user.username}</h4>
-                            <p class="text-gray-400 text-xs">TalkID: ${user.talkId}</p>
-                            <p class="text-xs text-green-400">Registrado</p>
-                        </div>
-                        <div class="flex space-x-1">
-                            <button onclick="connectToUserByTalkId('${user.talkId}')" class="p-2 bg-primary hover:bg-primary/80 rounded text-white text-xs">
-                                💬
-                            </button>
-                            <button onclick="callUserByTalkId('${user.talkId}')" class="p-2 bg-green-500 hover:bg-green-600 rounded text-white text-xs">
-                                📹
-                            </button>
-                        </div>
-                    </div>
-                `;
-                usersList.appendChild(userDiv);
-            });
-        }
-
-        function connectToUserByTalkId(talkId) {
-            document.getElementById('targetTalkId').value = talkId;
-            connectToUser();
-        }
-
-        function callUserByTalkId(talkId) {
-            startVideoCall(talkId);
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
 
         function searchItems() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
             if (searchTerm.length === 4 && /^\d+$/.test(searchTerm)) {
-                // If it's a 4-digit number, auto-fill the target input
                 document.getElementById('targetTalkId').value = searchTerm;
             }
 
@@ -2014,9 +2020,18 @@
             });
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
+        function disconnectFromUser() {
+            const targetTalkId = getCurrentTalkId();
+            if (targetTalkId && activeConnections.has(targetTalkId)) {
+                activeConnections.get(targetTalkId).close();
+                activeConnections.delete(targetTalkId);
+            }
+
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            document.getElementById('chatHeader').classList.add('hidden');
+            document.getElementById('chatMessages').classList.add('hidden');
+            document.getElementById('messageInput').classList.add('hidden');
+            document.getElementById('mobileTitle').textContent = 'TalkHub';
         }
 
         function copyTalkId() {
@@ -2037,19 +2052,10 @@
             });
         }
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
         // Settings Functions
         function showSettings() {
             document.getElementById('settingsModal').classList.remove('hidden');
-            document.getElementById('settingsUsername').value = currentUser;
-            document.getElementById('settingsAvatarUrl').value = currentUserAvatar || '';
+            document.getElementById('settingsAvatarUrl').value = currentUserData.avatar || '';
         }
 
         function closeSettingsModal() {
@@ -2057,59 +2063,59 @@
         }
 
         function saveSettings() {
-            const newUsername = document.getElementById('settingsUsername').value.trim();
             const newAvatar = document.getElementById('settingsAvatarUrl').value.trim();
-            
-            if (newUsername && newUsername !== currentUser) {
-                // Check if username is available
-                if (registeredUsers.has(newUsername) && newUsername !== currentUser) {
-                    showNotification('Erro', 'Nome de usuário já existe');
-                    return;
-                }
-                
-                // Update username
-                const userData = registeredUsers.get(currentUser);
-                registeredUsers.delete(currentUser);
-                userData.username = newUsername;
-                registeredUsers.set(newUsername, userData);
-                saveRegisteredUsers();
-                
-                currentUser = newUsername;
-                document.getElementById('currentUserName').textContent = newUsername;
-                document.getElementById('userInitials').textContent = newUsername.charAt(0).toUpperCase();
-            }
-            
-            if (newAvatar !== currentUserAvatar) {
-                currentUserAvatar = newAvatar;
-                
-                // Update in registered users
-                const userData = registeredUsers.get(currentUser);
-                userData.avatar = newAvatar;
-                registeredUsers.set(currentUser, userData);
-                saveRegisteredUsers();
-                
-                updateUserAvatar();
-            }
-            
-            closeSettingsModal();
-            showNotification('Configurações', 'Perfil atualizado com sucesso');
+            notificationsEnabled = document.getElementById('notificationsEnabled').checked;
+            soundEnabled = document.getElementById('soundEnabled').checked;
+
+            // Update user profile in Firestore
+            const updates = {
+                avatar: newAvatar || null
+            };
+
+            db.collection('users').doc(currentUser.uid).update(updates)
+                .then(() => {
+                    currentUserData.avatar = newAvatar;
+                    updateUserInterface();
+                    closeSettingsModal();
+                    showNotification('Configurações', 'Perfil atualizado com sucesso');
+                })
+                .catch((error) => {
+                    console.error('Error updating profile:', error);
+                    showNotification('Erro', 'Erro ao atualizar perfil');
+                });
         }
 
-        function updateUserAvatar() {
-            const avatarImg = document.getElementById('userAvatar');
-            const initials = document.getElementById('userInitials');
-
-            if (currentUserAvatar) {
-                avatarImg.src = currentUserAvatar;
-                avatarImg.classList.remove('hidden');
-                initials.classList.add('hidden');
+        // Helper Functions
+        function setLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            if (loading) {
+                button.disabled = true;
+                button.innerHTML = `
+                    <div class="flex items-center justify-center">
+                        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full loading-spinner mr-2"></div>
+                        Carregando...
+                    </div>
+                `;
             } else {
-                avatarImg.classList.add('hidden');
-                initials.classList.remove('hidden');
+                button.disabled = false;
+                if (buttonId === 'loginBtn') {
+                    button.textContent = 'Entrar';
+                } else if (buttonId === 'registerBtn') {
+                    button.textContent = 'Criar Conta';
+                }
             }
         }
 
-        // Notification Functions
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+
+        function showRegisterForm() {
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+        }
+
         function showNotification(title, body) {
             if (notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
                 const notification = new Notification(title, {
@@ -2157,58 +2163,47 @@
         }
 
         function showProfileModal() {
-            showNotification('Perfil', `Nome: ${currentUser}\nTalkID: ${myTalkId}\nAvatar: ${currentUserAvatar ? 'Definido' : 'Não definido'}`);
+            showNotification('Perfil', `Nome: ${currentUserData.name}\nTalkID: ${myTalkId}\nE-mail: ${currentUserData.email}`);
         }
 
-        function openImageModal(src, name) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4';
-            modal.onclick = () => modal.remove();
-
-            modal.innerHTML = `
-                <div class="max-w-4xl max-h-full">
-                    <img src="${src}" alt="${name}" class="max-w-full max-h-full object-contain rounded-lg">
-                    <p class="text-white text-center mt-4">${name}</p>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Auto-login if session exists
-        function checkExistingSession() {
-            const session = localStorage.getItem('talkhub_session');
-            if (session) {
-                const userData = JSON.parse(session);
-                
-                // Verify user still exists
-                if (registeredUsers.has(userData.username)) {
-                    currentUser = userData.username;
-                    currentUserEmail = userData.email;
-                    currentUserAvatar = userData.avatar;
-                    myTalkId = userData.talkId;
-                    
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    
-                    updateUserInterface();
-                    initializePeerWithTalkId();
-                    
-                    showNotification('Auto-Login', `Bem-vindo de volta, ${currentUser}!`);
-                    return true;
+        // File handling functions (simplified)
+        function handleFileSelect(event) {
+            // File handling implementation
+            showNotification('Arquivos', 'Seleção de arquivos em desenvolvimento');
+        }
+
+        function addFileMessage(data, sender, isOwn) {
+            // File message implementation
+            addMessage(`📎 ${data.fileName || 'Arquivo'}`, sender, isOwn, data.timestamp);
+        }
+
+        // Firebase Auth State Observer
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('User is signed in:', user);
+                if (!currentUser) {
+                    loadUserData(user);
                 }
+            } else {
+                console.log('User is signed out');
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
             }
-            return false;
-        }
+        });
 
-        // Initialize everything
+        // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            loadRegisteredUsers();
-            
-            // Check for existing session
-            if (!checkExistingSession()) {
-                showLoginForm();
-            }
+            // Show loading screen initially
+            document.getElementById('loadingScreen').classList.remove('hidden');
 
             // Request notification permission
             if ('Notification' in window && Notification.permission === 'default') {
@@ -2260,17 +2255,35 @@
                 }
             });
 
-            // Auto-focus on TalkID input and format it
+            // Auto-focus and format TalkID input
             const talkIdInput = document.getElementById('targetTalkId');
             if (talkIdInput) {
                 talkIdInput.addEventListener('input', function(e) {
-                    // Only allow numbers
                     this.value = this.value.replace(/\D/g, '');
                     if (this.value.length > 4) {
                         this.value = this.value.slice(0, 4);
                     }
                 });
             }
+
+            // Handle form submissions with Enter key
+            document.getElementById('loginEmail').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('loginPassword').focus();
+                }
+            });
+
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            document.getElementById('registerConfirmPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleRegister();
+                }
+            });
         });
     </script>
 </body>
